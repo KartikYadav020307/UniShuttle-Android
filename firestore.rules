@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    function isDriver()  { return isSignedIn() && userRole() == 'DRIVER'; }
+    function isAdmin()   { return isSignedIn() && userRole() == 'ADMIN'; }
+    function isStudent() { return isSignedIn() && userRole() == 'STUDENT'; }
+    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+
+    // ── users/{uid} ──
+    // Anyone can create their own profile on register.
+    // Only the owner or an admin can read/update.
+    match /users/{uid} {
+      allow create: if isSignedIn() && isOwner(uid);
+      allow read:   if isOwner(uid) || isAdmin();
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ── stops/{stopId} ──
+    // All authenticated users can read stops.
+    // Only admins can write.
+    match /stops/{stopId} {
+      allow read:  if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // ── seatAvailability/{shuttleId} ──
+    // Students and drivers can read.
+    // Only the driver or admin can write (driver writes their own shuttle doc).
+    match /seatAvailability/{shuttleId} {
+      allow read:  if isSignedIn();
+      allow write: if isDriver() || isAdmin();
+    }
+
+    // Deny all other access by default.
+  }
+}

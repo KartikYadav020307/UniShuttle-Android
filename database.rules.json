@@ -1,0 +1,12 @@
+{
+  "rules": {
+    "shuttles": {
+      "$shuttleId": {
+        // Authenticated drivers can write their own shuttle node.
+        // Any authenticated user (student, admin) can read.
+        ".read":  "auth != null",
+        ".write": "auth != null"
+      }
+    }
+  }
+}
