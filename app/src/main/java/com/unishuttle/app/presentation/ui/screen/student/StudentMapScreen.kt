@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +70,7 @@ import com.unishuttle.app.presentation.ui.component.EtaBadge
 import com.unishuttle.app.presentation.ui.component.MapFrame
 import com.unishuttle.app.presentation.ui.component.SeatMeter
 import com.unishuttle.app.presentation.ui.component.ShuttleMarker
+import com.unishuttle.app.presentation.ui.component.SignOutDialog
 import com.unishuttle.app.presentation.ui.component.StopMarker
 import com.unishuttle.app.presentation.ui.component.UniCard
 import com.unishuttle.app.presentation.ui.screen.map.CampusMapDefaults
@@ -89,6 +91,12 @@ data class CampusStop(
     val eta: String = "3 min",
     val availableSeats: Int = 14,
     val totalSeats: Int = 24,
+    val routePosition: String = "Stop 3 of 7",
+    val trafficLabel: String = "Light traffic",
+    val arrivals: List<StopArrival> = listOf(
+        StopArrival(shuttleId = "SH-2", seatsFree = 14),
+        StopArrival(shuttleId = "SH-5", seatsFree = 22),
+    ),
 )
 
 private val DefaultCampusStops = listOf(
@@ -101,6 +109,11 @@ private val DefaultCampusStops = listOf(
         eta = "3 min",
         availableSeats = 14,
         totalSeats = 24,
+        routePosition = "Stop 3 of 7",
+        arrivals = listOf(
+            StopArrival(shuttleId = "SH-2", seatsFree = 14),
+            StopArrival(shuttleId = "SH-5", seatsFree = 22),
+        ),
     ),
     CampusStop(
         id = "stop_tech_tower",
@@ -111,6 +124,11 @@ private val DefaultCampusStops = listOf(
         eta = "7 min",
         availableSeats = 18,
         totalSeats = 24,
+        routePosition = "Stop 4 of 7",
+        arrivals = listOf(
+            StopArrival(shuttleId = "SH-1", seatsFree = 18),
+            StopArrival(shuttleId = "SH-3", seatsFree = 9),
+        ),
     ),
     CampusStop(
         id = "stop_sjt",
@@ -121,6 +139,11 @@ private val DefaultCampusStops = listOf(
         eta = "12 min",
         availableSeats = 6,
         totalSeats = 24,
+        routePosition = "Stop 5 of 7",
+        arrivals = listOf(
+            StopArrival(shuttleId = "SH-3", seatsFree = 6),
+            StopArrival(shuttleId = "SH-1", seatsFree = 11),
+        ),
     ),
     CampusStop(
         id = "stop_prp",
@@ -131,6 +154,11 @@ private val DefaultCampusStops = listOf(
         eta = "5 min",
         availableSeats = 20,
         totalSeats = 24,
+        routePosition = "Stop 6 of 7",
+        arrivals = listOf(
+            StopArrival(shuttleId = "SH-5", seatsFree = 20),
+            StopArrival(shuttleId = "SH-2", seatsFree = 16),
+        ),
     ),
 )
 
@@ -156,12 +184,15 @@ fun StudentMapScreen(
         selectedStop = selectedStop,
         onStopSelected = { stop ->
             selectedStop = stop
-            // Tapping a stop prepares/opens UniBottomSheet
+            // Tapping a stop opens the StopDetail sheet
             isBottomSheetOpen = true
         },
         onNavigateToNotifications = onNavigateToNotifications,
         modifier = modifier,
         isMapPreview = false,
+        isStopSheetOpen = isBottomSheetOpen,
+        onStopSheetDismiss = { isBottomSheetOpen = false },
+        onLogout = onLogout,
     )
 }
 
@@ -175,6 +206,9 @@ fun StudentMapContent(
     onNavigateToNotifications: () -> Unit,
     modifier: Modifier = Modifier,
     isMapPreview: Boolean = false,
+    isStopSheetOpen: Boolean = false,
+    onStopSheetDismiss: () -> Unit = {},
+    onLogout: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val isDark = isSystemInDarkTheme()
@@ -239,6 +273,8 @@ fun StudentMapContent(
         )
     }
 
+    var showSignOutDialog by rememberSaveable { mutableStateOf(false) }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -270,30 +306,61 @@ fun StudentMapContent(
                 )
             }
 
-            // 48dp Sun bell button with 2dp Ink border and 3dp hard shadow
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .hardShadow(
-                        shape = CircleShape,
-                        offset = 3.dp,
-                        color = MaterialTheme.colorScheme.outline,
-                    )
-                    .clip(CircleShape)
-                    .background(UniColors.Sun)
-                    .border(BorderStroke(2.dp, MaterialTheme.colorScheme.outline), CircleShape)
-                    .clickable(
-                        role = Role.Button,
-                        onClick = onNavigateToNotifications,
-                    ),
-                contentAlignment = Alignment.Center,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Notifications,
-                    contentDescription = "Notifications",
-                    tint = UniColors.Ink,
-                    modifier = Modifier.size(24.dp),
-                )
+                // 48dp sign-out button, same construction as the bell (surface fill)
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .hardShadow(
+                            shape = CircleShape,
+                            offset = 3.dp,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surface)
+                        .border(BorderStroke(2.dp, MaterialTheme.colorScheme.outline), CircleShape)
+                        .clickable(
+                            role = Role.Button,
+                            onClick = { showSignOutDialog = true },
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = "Sign out",
+                        tint = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+
+                // 48dp Sun bell button with 2dp Ink border and 3dp hard shadow
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .hardShadow(
+                            shape = CircleShape,
+                            offset = 3.dp,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                        .clip(CircleShape)
+                        .background(UniColors.Sun)
+                        .border(BorderStroke(2.dp, MaterialTheme.colorScheme.outline), CircleShape)
+                        .clickable(
+                            role = Role.Button,
+                            onClick = onNavigateToNotifications,
+                        ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications",
+                        tint = UniColors.Ink,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         }
 
@@ -525,6 +592,23 @@ fun StudentMapContent(
                     showHeader = false,
                 )
             }
+        }
+
+        if (showSignOutDialog) {
+            SignOutDialog(
+                onConfirm = {
+                    showSignOutDialog = false
+                    onLogout()
+                },
+                onDismiss = { showSignOutDialog = false },
+            )
+        }
+
+        if (isStopSheetOpen) {
+            StopDetailSheet(
+                stop = selectedStop,
+                onDismiss = onStopSheetDismiss,
+            )
         }
     }
 }

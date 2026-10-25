@@ -17,17 +17,20 @@ service cloud.firestore {
     function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
 
     // ── users/{uid} ──
-    // Anyone can create their own profile on register.
-    // Only the owner or an admin can read/update.
+    // A signed-in user can read and create only their own document.
+    // On create the role must be "student" — the client never writes any
+    // other role. On update (owner or admin), the role field cannot change.
     match /users/{uid} {
-      allow create: if isSignedIn() && isOwner(uid);
+      allow create: if isSignedIn() && isOwner(uid)
+                    && request.resource.data.role == "student";
       allow read:   if isOwner(uid) || isAdmin();
-      allow update: if isOwner(uid) || isAdmin();
+      allow update: if (isOwner(uid) || isAdmin())
+                    && request.resource.data.role == resource.data.role;
       allow delete: if isAdmin();
     }
 
     // ── stops/{stopId} ──
-    // All authenticated users can read stops.
+    // All authenticated users can read stops (map and stop sheets).
     // Only admins can write.
     match /stops/{stopId} {
       allow read:  if isSignedIn();
@@ -35,13 +38,16 @@ service cloud.firestore {
     }
 
     // ── seatAvailability/{shuttleId} ──
-    // Students and drivers can read.
+    // Students and drivers can read (seat meters).
     // Only the driver or admin can write (driver writes their own shuttle doc).
     match /seatAvailability/{shuttleId} {
       allow read:  if isSignedIn();
       allow write: if isDriver() || isAdmin();
     }
 
-    // Deny all other access by default.
+    // Deny everything else.
+    match /{document=**} {
+      allow read, write: if false;
+    }
   }
 }

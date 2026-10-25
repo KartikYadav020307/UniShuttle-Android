@@ -31,12 +31,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -55,9 +53,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.unishuttle.app.domain.model.UserRole
 import com.unishuttle.app.presentation.ui.component.RoleToggle
+import com.unishuttle.app.presentation.ui.component.UniButton
+import com.unishuttle.app.presentation.ui.component.UniButtonVariant
 import com.unishuttle.app.presentation.ui.theme.UniColors
 import com.unishuttle.app.presentation.ui.theme.UniShuttleTheme
 import com.unishuttle.app.presentation.ui.theme.hardShadow
+import com.unishuttle.app.presentation.viewmodel.AuthUiState
 import com.unishuttle.app.presentation.viewmodel.AuthViewModel
 
 private val LogoContainerShape = RoundedCornerShape(36.dp)
@@ -69,24 +70,22 @@ fun LoginScreen(
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val selectedRole by viewModel.selectedRole.collectAsStateWithLifecycle()
     // Activity context required by Credential Manager to anchor its system sheet
     val context = LocalContext.current
 
-    // Persisted across recompositions so the chip stays selected on rotation
-    var selectedRole by rememberSaveable { mutableStateOf(UserRole.STUDENT) }
+    val signedOut = uiState as? AuthUiState.SignedOut
 
     LoginContent(
         modifier = modifier,
         selectedRole = selectedRole,
-        isLoading = uiState.isLoading,
-        errorMessage = uiState.error,
-        onRoleSelected = { role ->
-            selectedRole = role
-            viewModel.clearError()
-        },
-        onSignInClick = {
-            viewModel.signInWithGoogle(context, selectedRole)
-        },
+        isLoading = signedOut?.isBusy == true,
+        errorMessage = signedOut?.error,
+        showRetry = signedOut?.showRetry == true,
+        isConfigMissing = viewModel.isConfigMissing,
+        onRoleSelected = viewModel::selectRole,
+        onSignInClick = { viewModel.signInWithGoogle(context, selectedRole) },
+        onRetryClick = viewModel::retryLoadProfile,
     )
 }
 
@@ -95,8 +94,11 @@ fun LoginContent(
     selectedRole: UserRole,
     isLoading: Boolean,
     errorMessage: String?,
+    isConfigMissing: Boolean = false,
+    showRetry: Boolean = false,
     onRoleSelected: (UserRole) -> Unit,
     onSignInClick: () -> Unit,
+    onRetryClick: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val scrollState = rememberScrollState()
@@ -200,10 +202,35 @@ fun LoginContent(
         Spacer(modifier = Modifier.height(32.dp))
 
         // ── Sign in with Google Button ──
+        val driverSelected = selectedRole == UserRole.DRIVER
         GoogleSignInButton(
             isLoading = isLoading,
+            enabled = !driverSelected && !isConfigMissing,
             onClick = onSignInClick,
         )
+
+        if (driverSelected) {
+            // TODO(Step 3): enable driver sign-in.
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Driver sign-in is coming soon.",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+
+        if (isConfigMissing) {
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Missing GOOGLE_WEB_CLIENT_ID in local.properties",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
 
         Spacer(modifier = Modifier.height(14.dp))
 
@@ -227,6 +254,16 @@ fun LoginContent(
             )
         }
 
+        // ── Retry after a Firestore profile failure ──
+        if (showRetry) {
+            Spacer(modifier = Modifier.height(14.dp))
+            UniButton(
+                text = "Try again",
+                onClick = onRetryClick,
+                variant = UniButtonVariant.Secondary,
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
@@ -239,6 +276,7 @@ fun LoginContent(
 @Composable
 private fun GoogleSignInButton(
     isLoading: Boolean,
+    enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -246,13 +284,13 @@ private fun GoogleSignInButton(
     val isPressed by interactionSource.collectIsPressedAsState()
 
     val currentOffset by animateDpAsState(
-        targetValue = if (isPressed && !isLoading) 2.dp else 0.dp,
+        targetValue = if (isPressed && enabled && !isLoading) 2.dp else 0.dp,
         animationSpec = tween(durationMillis = 180),
         label = "google_button_press_offset",
     )
 
     val currentShadowOffset by animateDpAsState(
-        targetValue = if (isPressed && !isLoading) 2.dp else 4.dp,
+        targetValue = if (isPressed && enabled && !isLoading) 2.dp else 4.dp,
         animationSpec = tween(durationMillis = 180),
         label = "google_button_shadow_offset",
     )
@@ -261,6 +299,7 @@ private fun GoogleSignInButton(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
+            .alpha(if (enabled) 1f else 0.55f)
             .offset(x = currentOffset, y = currentOffset)
             .hardShadow(
                 shape = GoogleButtonShape,
@@ -273,7 +312,7 @@ private fun GoogleSignInButton(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
-                enabled = !isLoading,
+                enabled = enabled && !isLoading,
                 role = Role.Button,
                 onClick = onClick,
             ),

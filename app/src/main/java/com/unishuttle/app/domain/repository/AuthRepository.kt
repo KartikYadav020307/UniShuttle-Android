@@ -4,26 +4,38 @@ import com.unishuttle.app.domain.model.AppUser
 import com.unishuttle.app.domain.model.UserRole
 import kotlinx.coroutines.flow.Flow
 
-interface AuthRepository {
-    /** Emits the currently signed-in user, or null when signed out. */
-    val currentUser: Flow<AppUser?>
+/**
+ * Auth session state emitted by [AuthRepository.authState].
+ *
+ * [ProfileUnavailable] means a Firebase session exists but the Firestore profile
+ * could not be loaded — the user must not be routed into the app in that state.
+ */
+sealed interface AuthState {
+    data object SignedOut : AuthState
+    data class SignedIn(val user: AppUser) : AuthState
+    data class ProfileUnavailable(val message: String) : AuthState
+}
 
-    /** One-shot read of the current user (returns null if not signed in). */
+interface AuthRepository {
+    /** Emits on every auth change; loads the Firestore profile for active sessions. */
+    val authState: Flow<AuthState>
+
+    /** One-shot read of the current user (null if not signed in or profile missing). */
     suspend fun getCurrentUser(): AppUser?
 
     /**
      * Sign in with a Google ID token obtained from Credential Manager.
-     * Applies domain restrictions for [UserRole.STUDENT] accounts.
-     * Writes / merges the user document in Firestore on success.
+     * Applies the campus-domain and email-verified checks, then loads or creates
+     * the Firestore profile. The stored document's role always wins over [role].
      */
-    suspend fun signInWithGoogle(
-        idToken: String,
-        role: UserRole,
-    ): Result<AppUser>
+    suspend fun signInWithGoogle(idToken: String, role: UserRole): Result<AppUser>
+
+    /** Re-read the Firestore profile for the current session (retry path). */
+    suspend fun reloadProfile(): Result<AppUser>
 
     /**
-     * Sign out from Firebase Auth.
-     * Credential Manager session is cleared by the caller (Activity context needed).
+     * Sign out of Firebase Auth and clear the Credential Manager session.
+     * Only auth state is cleared; caches (map tiles, database) are untouched.
      */
     suspend fun logout()
 }

@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.unishuttle.app.presentation.viewmodel.AuthUiState
 import com.unishuttle.app.presentation.viewmodel.AuthViewModel
 
 /**
@@ -60,7 +61,7 @@ fun AdminPanelScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                text = "Welcome, ${authState.currentUser?.displayName ?: "Admin"}",
+                text = "Welcome, ${(authState as? AuthUiState.SignedIn)?.user?.displayName ?: "Admin"}",
                 style = MaterialTheme.typography.headlineSmall,
             )
 

@@ -1,0 +1,517 @@
+{
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\build.gradle.kts": {
+    "mtime": 1789419385.1838195,
+    "ast_hash": "59e3d25ad88c8f7ad860c7afe11647cb",
+    "semantic_hash": "59e3d25ad88c8f7ad860c7afe11647cb"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\MainActivity.kt": {
+    "mtime": 1789417499.7161958,
+    "ast_hash": "270a99874fdce504e5c92a7561a70c84",
+    "semantic_hash": "270a99874fdce504e5c92a7561a70c84"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\UniShuttleApplication.kt": {
+    "mtime": 1789347187.427368,
+    "ast_hash": "480be9bc3a2af3462e856bb123ef1d57",
+    "semantic_hash": "480be9bc3a2af3462e856bb123ef1d57"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\local\\dao\\NotificationDao.kt": {
+    "mtime": 1789347109.9392128,
+    "ast_hash": "0ed820864047b95ad98f745257c12342",
+    "semantic_hash": "0ed820864047b95ad98f745257c12342"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\local\\database\\UniShuttleDatabase.kt": {
+    "mtime": 1789347110.191571,
+    "ast_hash": "fd700ee4e0350a98ee50b268ddfd884a",
+    "semantic_hash": "fd700ee4e0350a98ee50b268ddfd884a"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\local\\entity\\NotificationEntity.kt": {
+    "mtime": 1789347098.180448,
+    "ast_hash": "14bedd0c6b8092ac1ef804f9bc7191f4",
+    "semantic_hash": "14bedd0c6b8092ac1ef804f9bc7191f4"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\local\\entity\\NotificationPreferenceEntity.kt": {
+    "mtime": 1789347106.6519115,
+    "ast_hash": "4517b6eb06123ac32c9667532af58fde",
+    "semantic_hash": "4517b6eb06123ac32c9667532af58fde"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\local\\entity\\StopAlertEntity.kt": {
+    "mtime": 1789347100.4038644,
+    "ast_hash": "ca4b00fc9f0b456ea63cc62762dcc212",
+    "semantic_hash": "ca4b00fc9f0b456ea63cc62762dcc212"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\mapper\\FirebaseMappers.kt": {
+    "mtime": 1789337506.5318859,
+    "ast_hash": "fc21951adbf6c29f3e9f89525ae97794",
+    "semantic_hash": "fc21951adbf6c29f3e9f89525ae97794"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\mapper\\PolylineDecoder.kt": {
+    "mtime": 1789336729.7041304,
+    "ast_hash": "7ee8a07463802049f81474c7b640e8c5",
+    "semantic_hash": "7ee8a07463802049f81474c7b640e8c5"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\remote\\UniShuttleMessagingService.kt": {
+    "mtime": 1789347144.801841,
+    "ast_hash": "2e7b1716e6b8d214130db318da5c91f6",
+    "semantic_hash": "2e7b1716e6b8d214130db318da5c91f6"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\remote\\api\\DirectionsApiService.kt": {
+    "mtime": 1789337774.9903643,
+    "ast_hash": "ee82336629531a37fdb3f9e61fb8829e",
+    "semantic_hash": "ee82336629531a37fdb3f9e61fb8829e"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\remote\\dto\\DirectionsResponseDto.kt": {
+    "mtime": 1789337782.1926606,
+    "ast_hash": "5f0f89625c80e720d97a7390ab2f494c",
+    "semantic_hash": "5f0f89625c80e720d97a7390ab2f494c"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\remote\\dto\\FirebaseShuttleLocationDto.kt": {
+    "mtime": 1789336928.1223714,
+    "ast_hash": "c95c2c83e5b8ed231f139466ec0f17f9",
+    "semantic_hash": "c95c2c83e5b8ed231f139466ec0f17f9"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\remote\\dto\\FirestoreSeatAvailabilityDto.kt": {
+    "mtime": 1789337504.4577284,
+    "ast_hash": "555f7e0be2186b3044c0981919ad5fa4",
+    "semantic_hash": "555f7e0be2186b3044c0981919ad5fa4"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\remote\\dto\\FirestoreShuttleStopDto.kt": {
+    "mtime": 1789336929.4486456,
+    "ast_hash": "8aea1990155cc749213256d506a165e7",
+    "semantic_hash": "8aea1990155cc749213256d506a165e7"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\repository\\FirebaseAuthRepository.kt": {
+    "mtime": 1792895913.0247273,
+    "ast_hash": "297bbfb076cd8c5b37d65183b3f97024",
+    "semantic_hash": "297bbfb076cd8c5b37d65183b3f97024"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\repository\\FirebaseSeatAvailabilityRepository.kt": {
+    "mtime": 1789337507.5878408,
+    "ast_hash": "f6c15333f7981dd6650cc63a934d0d0f",
+    "semantic_hash": "f6c15333f7981dd6650cc63a934d0d0f"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\repository\\FirebaseShuttleLocationRepository.kt": {
+    "mtime": 1789336934.1216097,
+    "ast_hash": "84d5ad291fe9907689a38312f5ca23e8",
+    "semantic_hash": "84d5ad291fe9907689a38312f5ca23e8"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\repository\\FirebaseShuttleStopRepository.kt": {
+    "mtime": 1789336777.1031272,
+    "ast_hash": "61eb7efd86ddd6f25f101d778d32fb2b",
+    "semantic_hash": "61eb7efd86ddd6f25f101d778d32fb2b"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\repository\\GoogleDirectionsRouteRepository.kt": {
+    "mtime": 1789337870.758908,
+    "ast_hash": "901bcafb2963e24d5867286466a7ef86",
+    "semantic_hash": "901bcafb2963e24d5867286466a7ef86"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\data\\repository\\LocalNotificationRepository.kt": {
+    "mtime": 1789347144.4627602,
+    "ast_hash": "adca61b1573dbe4e341f0e7b776eafe8",
+    "semantic_hash": "adca61b1573dbe4e341f0e7b776eafe8"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\di\\AuthModule.kt": {
+    "mtime": 1789417308.8594248,
+    "ast_hash": "f4b7aac176b267eba2f6de3fc465fe9c",
+    "semantic_hash": "f4b7aac176b267eba2f6de3fc465fe9c"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\di\\DatabaseModule.kt": {
+    "mtime": 1789347159.0945306,
+    "ast_hash": "da3ad80028f57571c838bb6940ea17fa",
+    "semantic_hash": "da3ad80028f57571c838bb6940ea17fa"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\di\\FirebaseModule.kt": {
+    "mtime": 1789347168.0109751,
+    "ast_hash": "c01e3a46b3ac69aab85e72fc57afaf0d",
+    "semantic_hash": "c01e3a46b3ac69aab85e72fc57afaf0d"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\di\\LocationModule.kt": {
+    "mtime": 1789336782.9715433,
+    "ast_hash": "06f922ef91fb72c11697a8bcdd0690ef",
+    "semantic_hash": "06f922ef91fb72c11697a8bcdd0690ef"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\di\\NetworkModule.kt": {
+    "mtime": 1789336935.470702,
+    "ast_hash": "304e4a6d1b578c9aa5ef1d3634bd479e",
+    "semantic_hash": "304e4a6d1b578c9aa5ef1d3634bd479e"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\di\\RepositoryModule.kt": {
+    "mtime": 1789417309.151305,
+    "ast_hash": "43ec84cfe7e7d93b1f1385d83ffa3578",
+    "semantic_hash": "43ec84cfe7e7d93b1f1385d83ffa3578"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\AppUser.kt": {
+    "mtime": 1789417252.8308015,
+    "ast_hash": "ae0ccc8bfb4a91175232b25ff7218932",
+    "semantic_hash": "ae0ccc8bfb4a91175232b25ff7218932"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\CampusLatLng.kt": {
+    "mtime": 1789336712.426344,
+    "ast_hash": "0ee8a914cfd4867abfa4f0f87a27e125",
+    "semantic_hash": "0ee8a914cfd4867abfa4f0f87a27e125"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\NotificationItem.kt": {
+    "mtime": 1789347085.002687,
+    "ast_hash": "5e52120077a0fd8d3c7521e9c4035a09",
+    "semantic_hash": "5e52120077a0fd8d3c7521e9c4035a09"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\NotificationPreference.kt": {
+    "mtime": 1789347088.785,
+    "ast_hash": "f16e980d2e0460be9ba82635d509a52c",
+    "semantic_hash": "f16e980d2e0460be9ba82635d509a52c"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\SeatAvailability.kt": {
+    "mtime": 1789337499.5024421,
+    "ast_hash": "7f588c025da6169ecfad6f23e14bb7fd",
+    "semantic_hash": "7f588c025da6169ecfad6f23e14bb7fd"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\ShuttleLocation.kt": {
+    "mtime": 1789336713.749164,
+    "ast_hash": "44c0b5ae6b8ad1139febf6f82dd425f1",
+    "semantic_hash": "44c0b5ae6b8ad1139febf6f82dd425f1"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\ShuttleStop.kt": {
+    "mtime": 1789336715.040984,
+    "ast_hash": "a480f617ff2b8700d201cd9ba427b148",
+    "semantic_hash": "a480f617ff2b8700d201cd9ba427b148"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\StopAlert.kt": {
+    "mtime": 1789347083.2109122,
+    "ast_hash": "2cc56352a9882f004d8d41e236c81d2d",
+    "semantic_hash": "2cc56352a9882f004d8d41e236c81d2d"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\StopEta.kt": {
+    "mtime": 1789337500.4892683,
+    "ast_hash": "13dc7048e6ea88ee74d3e3832ddc0cc6",
+    "semantic_hash": "13dc7048e6ea88ee74d3e3832ddc0cc6"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\model\\UserRole.kt": {
+    "mtime": 1789417247.8532798,
+    "ast_hash": "58cc6173b1de6b1736841e48085995b0",
+    "semantic_hash": "58cc6173b1de6b1736841e48085995b0"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\repository\\AuthRepository.kt": {
+    "mtime": 1792895889.7934566,
+    "ast_hash": "c5487fc5b82fe7de8ba02bbb785ec0f4",
+    "semantic_hash": "c5487fc5b82fe7de8ba02bbb785ec0f4"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\repository\\NotificationRepository.kt": {
+    "mtime": 1789347089.1505985,
+    "ast_hash": "47b80d2d68ac006530ffd9375bd0f766",
+    "semantic_hash": "47b80d2d68ac006530ffd9375bd0f766"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\repository\\RouteRepository.kt": {
+    "mtime": 1789337498.5229824,
+    "ast_hash": "b8ddee9ffee91c41ed8006446fa2e688",
+    "semantic_hash": "b8ddee9ffee91c41ed8006446fa2e688"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\repository\\SeatAvailabilityRepository.kt": {
+    "mtime": 1789337503.4699905,
+    "ast_hash": "b3fd92c3e40a3257c42714dc0868988d",
+    "semantic_hash": "b3fd92c3e40a3257c42714dc0868988d"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\repository\\ShuttleLocationRepository.kt": {
+    "mtime": 1789336719.4513357,
+    "ast_hash": "23617d398b7856669f71542017acca69",
+    "semantic_hash": "23617d398b7856669f71542017acca69"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\domain\\repository\\ShuttleStopRepository.kt": {
+    "mtime": 1789336720.7724526,
+    "ast_hash": "989b4a7f5fec6166be7c624b226d5388",
+    "semantic_hash": "989b4a7f5fec6166be7c624b226d5388"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\driver\\DriverLocationService.kt": {
+    "mtime": 1789337023.5290346,
+    "ast_hash": "1cd5a701736d61b2b190836f4d93c936",
+    "semantic_hash": "1cd5a701736d61b2b190836f4d93c936"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\navigation\\NavRoute.kt": {
+    "mtime": 1789417376.4460347,
+    "ast_hash": "469306490a3f24865bed6d4bc8d1a7e6",
+    "semantic_hash": "469306490a3f24865bed6d4bc8d1a7e6"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\navigation\\UniShuttleNavGraph.kt": {
+    "mtime": 1792896085.9921062,
+    "ast_hash": "7950446f02ae1e93781eb67008427ec4",
+    "semantic_hash": "7950446f02ae1e93781eb67008427ec4"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\AlertChip.kt": {
+    "mtime": 1792527190.0388474,
+    "ast_hash": "1412a3b039cdb58c9bef4c4359bce38f",
+    "semantic_hash": "1412a3b039cdb58c9bef4c4359bce38f"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\AlertTimePicker.kt": {
+    "mtime": 1789347204.5936608,
+    "ast_hash": "53c9121c16a7ffc4fc26fb951d00d80a",
+    "semantic_hash": "53c9121c16a7ffc4fc26fb951d00d80a"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\EtaBadge.kt": {
+    "mtime": 1792876322.4753013,
+    "ast_hash": "9393b11e50844aa6d105d7653791b1a0",
+    "semantic_hash": "9393b11e50844aa6d105d7653791b1a0"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\MapFrame.kt": {
+    "mtime": 1792527320.722647,
+    "ast_hash": "da92c33998f5ab8c4cbb3e66407da914",
+    "semantic_hash": "da92c33998f5ab8c4cbb3e66407da914"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\NotificationRow.kt": {
+    "mtime": 1792527308.7889428,
+    "ast_hash": "1acbbf32cb754e0fb71db298d26476c1",
+    "semantic_hash": "1acbbf32cb754e0fb71db298d26476c1"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\RoleToggle.kt": {
+    "mtime": 1792527172.1470814,
+    "ast_hash": "1783f7decd3678f51f4a5d3015ea6ccb",
+    "semantic_hash": "1783f7decd3678f51f4a5d3015ea6ccb"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\SeatAvailabilityMeter.kt": {
+    "mtime": 1789337767.0832813,
+    "ast_hash": "88e2e6f2fe1d6a1def6cc41b367f19ff",
+    "semantic_hash": "88e2e6f2fe1d6a1def6cc41b367f19ff"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\SeatMeter.kt": {
+    "mtime": 1792593624.4155288,
+    "ast_hash": "5e78d946ae0b236e23ad07aec251ed81",
+    "semantic_hash": "5e78d946ae0b236e23ad07aec251ed81"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\ShuttleMarker.kt": {
+    "mtime": 1792527265.6197832,
+    "ast_hash": "0f4a116a1d1439049f04cc2c00336054",
+    "semantic_hash": "0f4a116a1d1439049f04cc2c00336054"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\SignOutDialog.kt": {
+    "mtime": 1792895952.8179114,
+    "ast_hash": "9e74eb4ce942cc02ae375db4479bb7ca",
+    "semantic_hash": "9e74eb4ce942cc02ae375db4479bb7ca"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\StopMarker.kt": {
+    "mtime": 1792527278.899521,
+    "ast_hash": "540a20483e0944337b79b531496a5871",
+    "semantic_hash": "540a20483e0944337b79b531496a5871"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\UniBottomSheet.kt": {
+    "mtime": 1792527292.7874632,
+    "ast_hash": "7781e95434c59737f004d43df1792596",
+    "semantic_hash": "7781e95434c59737f004d43df1792596"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\UniButton.kt": {
+    "mtime": 1792527153.2586067,
+    "ast_hash": "dbe21e875d3d2bb23119e220997df724",
+    "semantic_hash": "dbe21e875d3d2bb23119e220997df724"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\component\\UniCard.kt": {
+    "mtime": 1792527213.0498145,
+    "ast_hash": "a8c5d052884655ab2bb8a84939469281",
+    "semantic_hash": "a8c5d052884655ab2bb8a84939469281"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\admin\\AdminPanelScreen.kt": {
+    "mtime": 1792896085.9220848,
+    "ast_hash": "acbb2bad0fccf20aaab4b59e89c31beb",
+    "semantic_hash": "acbb2bad0fccf20aaab4b59e89c31beb"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\auth\\LoginScreen.kt": {
+    "mtime": 1792896053.117028,
+    "ast_hash": "1ab66b025e455a4bf70cfe8ad9624c23",
+    "semantic_hash": "1ab66b025e455a4bf70cfe8ad9624c23"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\auth\\RegisterScreen.kt": {
+    "mtime": 1789422972.2951512,
+    "ast_hash": "cce24891b640e167993e02b248ed40d7",
+    "semantic_hash": "cce24891b640e167993e02b248ed40d7"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\driver\\DriverDashboardScreen.kt": {
+    "mtime": 1789417445.145053,
+    "ast_hash": "0eae874452255292b46ac64bb4569fcf",
+    "semantic_hash": "0eae874452255292b46ac64bb4569fcf"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\driver\\DriverHomeScreen.kt": {
+    "mtime": 1792896067.6122587,
+    "ast_hash": "35cf855cb2f96bad22728f09d6af8fd4",
+    "semantic_hash": "35cf855cb2f96bad22728f09d6af8fd4"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\driver\\DriverSeatCounterScreen.kt": {
+    "mtime": 1789337630.5525424,
+    "ast_hash": "9c321d06412a42398dd9e54c72d84bb9",
+    "semantic_hash": "9c321d06412a42398dd9e54c72d84bb9"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\map\\CampusMapDefaults.kt": {
+    "mtime": 1789424592.9170613,
+    "ast_hash": "3e72475d4c73201b8dc11776ce70ea03",
+    "semantic_hash": "3e72475d4c73201b8dc11776ce70ea03"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\map\\CampusMapScreen.kt": {
+    "mtime": 1789347300.112811,
+    "ast_hash": "2be38aecc22d64ebf9109444c33176c6",
+    "semantic_hash": "2be38aecc22d64ebf9109444c33176c6"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\map\\MapMarkerIcons.kt": {
+    "mtime": 1789417486.97858,
+    "ast_hash": "f2784a0f640fc847bb0da42a75b11793",
+    "semantic_hash": "f2784a0f640fc847bb0da42a75b11793"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\map\\StopDetailBottomSheet.kt": {
+    "mtime": 1789347227.6101537,
+    "ast_hash": "9567598cf2a0f01ffe6f047c1b10ec4a",
+    "semantic_hash": "9567598cf2a0f01ffe6f047c1b10ec4a"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\notifications\\NotificationCenterScreen.kt": {
+    "mtime": 1789347336.0408473,
+    "ast_hash": "ac8133905e2d81c5b39e8db0cc588cc2",
+    "semantic_hash": "ac8133905e2d81c5b39e8db0cc588cc2"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\student\\StopDetailSheet.kt": {
+    "mtime": 1792876349.6673517,
+    "ast_hash": "5f74d8fc79563365070ea8b9d413c0c8",
+    "semantic_hash": "5f74d8fc79563365070ea8b9d413c0c8"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\screen\\student\\StudentMapScreen.kt": {
+    "mtime": 1792896237.2436538,
+    "ast_hash": "4d19d94f0a67d8ce79ba9fcd8d5a7494",
+    "semantic_hash": "4d19d94f0a67d8ce79ba9fcd8d5a7494"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\theme\\Color.kt": {
+    "mtime": 1792527039.2719603,
+    "ast_hash": "394632db887d5b800248fdcc275421d5",
+    "semantic_hash": "394632db887d5b800248fdcc275421d5"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\theme\\Theme.kt": {
+    "mtime": 1792527063.5144897,
+    "ast_hash": "5a81f0810ebd1b5246edd5f9dcc727f6",
+    "semantic_hash": "5a81f0810ebd1b5246edd5f9dcc727f6"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\ui\\theme\\Type.kt": {
+    "mtime": 1789335527.891662,
+    "ast_hash": "394179c08b5d4628ab6d453872572d6a",
+    "semantic_hash": "394179c08b5d4628ab6d453872572d6a"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\AuthViewModel.kt": {
+    "mtime": 1792895945.6940477,
+    "ast_hash": "7b6e07f71dc95161da38b9ce96786d65",
+    "semantic_hash": "7b6e07f71dc95161da38b9ce96786d65"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\CampusMapUiState.kt": {
+    "mtime": 1789347240.0634336,
+    "ast_hash": "ec0806ad5610e0ba01b96c0a015fa0ac",
+    "semantic_hash": "ec0806ad5610e0ba01b96c0a015fa0ac"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\CampusMapViewModel.kt": {
+    "mtime": 1789347263.1819868,
+    "ast_hash": "db7369ad22a1c538ca245cfd83259055",
+    "semantic_hash": "db7369ad22a1c538ca245cfd83259055"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\DriverDashboardViewModel.kt": {
+    "mtime": 1789417444.6239188,
+    "ast_hash": "f1b682f39e9859edfa177115c76bdb69",
+    "semantic_hash": "f1b682f39e9859edfa177115c76bdb69"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\DriverSeatUiState.kt": {
+    "mtime": 1789337625.753219,
+    "ast_hash": "9f59b1bf1382c82da1b19b621882936a",
+    "semantic_hash": "9f59b1bf1382c82da1b19b621882936a"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\DriverSeatViewModel.kt": {
+    "mtime": 1789337626.7952101,
+    "ast_hash": "905f9656464f6bc35cfb4d8dbbd3d3e7",
+    "semantic_hash": "905f9656464f6bc35cfb4d8dbbd3d3e7"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\NotificationCenterUiState.kt": {
+    "mtime": 1789347314.8673155,
+    "ast_hash": "c93fadbf9994ee7183ee52d671feaef4",
+    "semantic_hash": "c93fadbf9994ee7183ee52d671feaef4"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\NotificationCenterViewModel.kt": {
+    "mtime": 1789347335.6198268,
+    "ast_hash": "4f636519e6299fde404fe1c6efa7656e",
+    "semantic_hash": "4f636519e6299fde404fe1c6efa7656e"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\java\\com\\unishuttle\\app\\presentation\\viewmodel\\StudentMapViewModel.kt": {
+    "mtime": 1789417402.4313178,
+    "ast_hash": "7cd14901993e01bf9877cfd2a96ffb47",
+    "semantic_hash": "7cd14901993e01bf9877cfd2a96ffb47"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\res\\raw\\map_style_dark.json": {
+    "mtime": 1792527089.684297,
+    "ast_hash": "a235243c09b1df40b444dd57069683e7",
+    "semantic_hash": "a235243c09b1df40b444dd57069683e7"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\app\\src\\main\\res\\raw\\map_style_light.json": {
+    "mtime": 1792527076.151538,
+    "ast_hash": "84446af0ff0dc6f0c33a6db6eb21b307",
+    "semantic_hash": "84446af0ff0dc6f0c33a6db6eb21b307"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\build.gradle.kts": {
+    "mtime": 1789391297.4303963,
+    "ast_hash": "366e79a3789377dcb375f4ed097faf6f",
+    "semantic_hash": "366e79a3789377dcb375f4ed097faf6f"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\database.rules.json": {
+    "mtime": 1789417539.5512278,
+    "ast_hash": "046b13ac55dfb37d0363a09826d99548",
+    "semantic_hash": "046b13ac55dfb37d0363a09826d99548"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\functions\\package.json": {
+    "mtime": 1789347365.142232,
+    "ast_hash": "1a3f985a287edc303f12f89f9aa6a279",
+    "semantic_hash": "1a3f985a287edc303f12f89f9aa6a279"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\functions\\src\\index.ts": {
+    "mtime": 1789347387.3952434,
+    "ast_hash": "f0b656ef7fb0736594a529c02ad093c4",
+    "semantic_hash": "f0b656ef7fb0736594a529c02ad093c4"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\functions\\tsconfig.json": {
+    "mtime": 1789347386.9002905,
+    "ast_hash": "1f2c619e7de3e9c73bc08f17e00b61c0",
+    "semantic_hash": "1f2c619e7de3e9c73bc08f17e00b61c0"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\gradlew": {
+    "mtime": 1792528710.0125203,
+    "ast_hash": "a43be8432bac3ffd05b3769aa42fe996",
+    "semantic_hash": "a43be8432bac3ffd05b3769aa42fe996"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\settings.gradle.kts": {
+    "mtime": 1789335505.9638603,
+    "ast_hash": "40ef5b02952a4c3d75db1e87814625eb",
+    "semantic_hash": "40ef5b02952a4c3d75db1e87814625eb"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\.zcode\\plans\\plan-session_fe4a432de895d4b69e4c75aeb41049d8.md": {
+    "mtime": 1792895647.6163504,
+    "ast_hash": "6c70eb135d52e960e43c1462763474c2",
+    "semantic_hash": "6c70eb135d52e960e43c1462763474c2"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\UNISHUTTLE_CONTEXT_AND_SYSTEM_DESIGN.md": {
+    "mtime": 1792509394.4733276,
+    "ast_hash": "c220ca84ad7081d8ea5b9eed5594e47d",
+    "semantic_hash": "c220ca84ad7081d8ea5b9eed5594e47d"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\docs\\google-sign-in-setup.md": {
+    "mtime": 1789419548.2118294,
+    "ast_hash": "b5244b0caa883d41f986400edc660ca6",
+    "semantic_hash": "b5244b0caa883d41f986400edc660ca6"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\docs\\phase-0-setup.md": {
+    "mtime": 1789335576.748243,
+    "ast_hash": "33e9842fc25f9500af21c6f48cea11e1",
+    "semantic_hash": "33e9842fc25f9500af21c6f48cea11e1"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\docs\\phase-1-core-map-tracking.md": {
+    "mtime": 1789336951.2936263,
+    "ast_hash": "24ee3b1f747bb936042ed1c13be4ac3d",
+    "semantic_hash": "24ee3b1f747bb936042ed1c13be4ac3d"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\docs\\phase-2-seat-eta.md": {
+    "mtime": 1789337817.32568,
+    "ast_hash": "7ebedafef0d2bc83dc097b2fc1abd779",
+    "semantic_hash": "7ebedafef0d2bc83dc097b2fc1abd779"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\docs\\phase-3-notifications-alerts.md": {
+    "mtime": 1789347416.2518923,
+    "ast_hash": "1873743541282e2268dba30d14e0963e",
+    "semantic_hash": "1873743541282e2268dba30d14e0963e"
+  },
+  "C:\\Users\\yamle\\OneDrive\\Desktop\\UniShuttle Android\\docs\\phase-4-auth-routing.md": {
+    "mtime": 1789417539.8504176,
+    "ast_hash": "97d5cadd7d65f142b0cf4c262c598733",
+    "semantic_hash": "97d5cadd7d65f142b0cf4c262c598733"
+  }
+}

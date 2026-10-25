@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.unishuttle.app.presentation.ui.theme.UniColors
@@ -33,12 +34,13 @@ fun EtaBadge(
     text: String,
     modifier: Modifier = Modifier,
     showIcon: Boolean = true,
+    containerColor: Color = UniColors.Sun,
 ) {
     Box(
         modifier = modifier
             .height(36.dp)
             .clip(BadgeShape)
-            .background(UniColors.Sun)
+            .background(containerColor)
             .border(BorderStroke(2.dp, MaterialTheme.colorScheme.outline), BadgeShape)
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center,

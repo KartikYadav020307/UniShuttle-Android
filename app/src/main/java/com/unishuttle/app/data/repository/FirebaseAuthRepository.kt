@@ -1,11 +1,17 @@
 package com.unishuttle.app.data.repository
 
+import android.content.Context
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.unishuttle.app.domain.model.AppUser
 import com.unishuttle.app.domain.model.UserRole
 import com.unishuttle.app.domain.repository.AuthRepository
+import com.unishuttle.app.domain.repository.AuthState
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -15,32 +21,38 @@ import javax.inject.Singleton
 
 @Singleton
 class FirebaseAuthRepository @Inject constructor(
+    @ApplicationContext appContext: Context,
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
 ) : AuthRepository {
 
     private val usersRef = firestore.collection("users")
 
+    // clearCredentialState() works with the application context; only the account
+    // picker (getCredential) needs an Activity, so that call stays in the ViewModel.
+    private val credentialManager = CredentialManager.create(appContext)
+
     // ── Reactive auth state ──────────────────────────────────────────────────
 
-    override val currentUser: Flow<AppUser?> = callbackFlow {
+    override val authState: Flow<AuthState> = callbackFlow {
         val listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
             val firebaseUser = firebaseAuth.currentUser
             if (firebaseUser == null) {
-                trySend(null)
+                trySend(AuthState.SignedOut)
             } else {
                 usersRef.document(firebaseUser.uid).get()
-                    .addOnSuccessListener { doc -> trySend(doc.toAppUser(firebaseUser.uid)) }
+                    .addOnSuccessListener { doc ->
+                        val user = doc.toAppUser(firebaseUser.uid)
+                        if (user == null) {
+                            trySend(AuthState.ProfileUnavailable(PROFILE_LOAD_MESSAGE))
+                        } else {
+                            trySend(AuthState.SignedIn(user))
+                        }
+                    }
                     .addOnFailureListener {
-                        // Firestore read failed — emit a minimal user to avoid being stuck
-                        trySend(
-                            AppUser(
-                                uid = firebaseUser.uid,
-                                email = firebaseUser.email.orEmpty(),
-                                displayName = firebaseUser.displayName.orEmpty(),
-                                role = UserRole.STUDENT,
-                            ),
-                        )
+                        // Do not fake a role or route the user when the profile
+                        // cannot be loaded — surface it as a retryable error.
+                        trySend(AuthState.ProfileUnavailable(PROFILE_LOAD_MESSAGE))
                     }
             }
         }
@@ -61,61 +73,104 @@ class FirebaseAuthRepository @Inject constructor(
         idToken: String,
         role: UserRole,
     ): Result<AppUser> = runCatching {
-
-        // 1. Exchange the Google ID token for a Firebase credential
+        // 1. Exchange the Google ID token for a Firebase session
         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
-        val authResult = auth.signInWithCredential(firebaseCredential).await()
-        val firebaseUser = authResult.user
+        val firebaseUser = auth.signInWithCredential(firebaseCredential).await().user
             ?: error("Firebase sign-in returned a null user.")
 
         val email = firebaseUser.email.orEmpty()
 
-        // 2. Domain check — students must use the VIT email domain
-        if (role == UserRole.STUDENT && !email.endsWith(STUDENT_DOMAIN)) {
-            auth.signOut()
-            // Throw a typed exception so the ViewModel can show the right message
-            throw DomainRestrictionException(
-                "Please use your VIT student email ($STUDENT_DOMAIN) to sign in as a Student.",
-            )
+        // 2. Campus domain lock for students (case-insensitive, exact domain).
+        // TODO(Blaze): enforce the domain server-side with a Firebase blocking
+        //   function once the project is on the Blaze plan, so a modified client
+        //   cannot bypass this check.
+        if (role == UserRole.STUDENT && !email.endsWith(STUDENT_DOMAIN, ignoreCase = true)) {
+            abortSession()
+            throw DomainRestrictionException(CAMPUS_ACCOUNT_MESSAGE)
         }
 
-        // 3. Auto-assign a shuttleId for drivers on first sign-in
-        val shuttleId = if (role == UserRole.DRIVER) {
-            "shuttle-${firebaseUser.uid.take(6)}"
-        } else {
-            ""
+        // 3. The Google account email must be verified
+        if (!firebaseUser.isEmailVerified) {
+            abortSession()
+            throw EmailNotVerifiedException(EMAIL_NOT_VERIFIED_MESSAGE)
         }
 
-        // 4. Write / merge user document in Firestore
-        //    merge:true preserves existing fields (e.g. shuttleId set by an admin)
-        usersRef.document(firebaseUser.uid).set(
-            mapOf(
+        // 4. The Firestore document is the source of truth for the role
+        val docRef = usersRef.document(firebaseUser.uid)
+        val snapshot = try {
+            docRef.get().await()
+        } catch (_: Exception) {
+            throw ProfileUnavailableException(PROFILE_LOAD_MESSAGE)
+        }
+
+        if (snapshot.exists()) {
+            // Existing profile: use its stored role, whatever the login toggle said.
+            snapshot.toAppUser(firebaseUser.uid)
+                ?: throw ProfileUnavailableException(PROFILE_LOAD_MESSAGE)
+        } else if (role == UserRole.STUDENT) {
+            val profile = mapOf(
                 "uid" to firebaseUser.uid,
                 "email" to email,
-                "displayName" to (firebaseUser.displayName.orEmpty()),
-                "role" to role.name,
-                "shuttleId" to shuttleId,
-            ),
-        ).await()
+                "displayName" to firebaseUser.displayName.orEmpty(),
+                "photoUrl" to (firebaseUser.photoUrl?.toString().orEmpty()),
+                // The client must never write any role other than "student".
+                "role" to ROLE_STUDENT,
+                "createdAt" to FieldValue.serverTimestamp(),
+            )
+            try {
+                docRef.set(profile).await()
+            } catch (_: Exception) {
+                throw ProfileUnavailableException(PROFILE_LOAD_MESSAGE)
+            }
+            AppUser(
+                uid = firebaseUser.uid,
+                email = email,
+                displayName = firebaseUser.displayName.orEmpty(),
+                role = UserRole.STUDENT,
+            )
+        } else {
+            // TODO(Step 3): real driver sign-in and driver-only checks.
+            abortSession()
+            throw DriverNotEnabledException(DRIVER_NOT_ENABLED_MESSAGE)
+        }
+    }
 
-        AppUser(
-            uid = firebaseUser.uid,
-            email = email,
-            displayName = firebaseUser.displayName.orEmpty(),
-            role = role,
-            shuttleId = shuttleId,
-        )
+    // ── Profile retry ────────────────────────────────────────────────────────
+
+    override suspend fun reloadProfile(): Result<AppUser> = runCatching {
+        val firebaseUser = auth.currentUser
+            ?: throw ProfileUnavailableException(PROFILE_LOAD_MESSAGE)
+        val snapshot = try {
+            usersRef.document(firebaseUser.uid).get().await()
+        } catch (_: Exception) {
+            throw ProfileUnavailableException(PROFILE_LOAD_MESSAGE)
+        }
+        snapshot.toAppUser(firebaseUser.uid)
+            ?: throw ProfileUnavailableException(PROFILE_LOAD_MESSAGE)
     }
 
     // ── Sign Out ─────────────────────────────────────────────────────────────
 
     override suspend fun logout() {
         auth.signOut()
-        // Credential Manager clearCredentialState() requires an Activity context,
-        // so it is called from the ViewModel using the application context.
+        clearCredentialState()
     }
 
     // ── Internal helpers ─────────────────────────────────────────────────────
+
+    /** Kills the just-created session and the Credential Manager state with it. */
+    private suspend fun abortSession() {
+        auth.signOut()
+        clearCredentialState()
+    }
+
+    private suspend fun clearCredentialState() {
+        try {
+            credentialManager.clearCredentialState(ClearCredentialStateRequest())
+        } catch (_: Exception) {
+            // Best-effort: the Firebase session is already gone.
+        }
+    }
 
     private fun com.google.firebase.firestore.DocumentSnapshot.toAppUser(uid: String): AppUser? {
         if (!exists()) return null
@@ -130,8 +185,23 @@ class FirebaseAuthRepository @Inject constructor(
 
     companion object {
         const val STUDENT_DOMAIN = "@vitstudent.ac.in"
+        const val ROLE_STUDENT = "student"
+        const val CAMPUS_ACCOUNT_MESSAGE = "Sign in with your campus account (@vitstudent.ac.in)."
+        const val EMAIL_NOT_VERIFIED_MESSAGE = "Your Google account email isn't verified."
+        const val DRIVER_NOT_ENABLED_MESSAGE = "Driver accounts aren't set up yet."
+        const val PROFILE_LOAD_MESSAGE =
+            "Couldn't load your account. Check your connection and try again."
     }
 }
 
 /** Thrown when an email fails the per-role domain restriction. */
 class DomainRestrictionException(message: String) : Exception(message)
+
+/** Thrown when the Google account email is not verified. */
+class EmailNotVerifiedException(message: String) : Exception(message)
+
+/** Thrown when driver sign-in is attempted before Step 3 ships. */
+class DriverNotEnabledException(message: String) : Exception(message)
+
+/** Thrown when the Firestore profile cannot be read or written. */
+class ProfileUnavailableException(message: String) : Exception(message)

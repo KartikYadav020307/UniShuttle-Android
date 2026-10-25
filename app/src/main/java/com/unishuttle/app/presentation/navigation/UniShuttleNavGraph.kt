@@ -1,9 +1,12 @@
 package com.unishuttle.app.presentation.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,20 +19,26 @@ import com.unishuttle.app.domain.model.UserRole
 import com.unishuttle.app.presentation.ui.screen.admin.AdminPanelScreen
 import com.unishuttle.app.presentation.ui.screen.auth.LoginScreen
 import com.unishuttle.app.presentation.ui.screen.auth.RegisterScreen
-import com.unishuttle.app.presentation.ui.screen.driver.DriverDashboardScreen
+import com.unishuttle.app.presentation.ui.screen.driver.DriverHomeScreen
 import com.unishuttle.app.presentation.ui.screen.notifications.NotificationCenterScreen
 import com.unishuttle.app.presentation.ui.screen.student.StudentMapScreen
+import com.unishuttle.app.presentation.viewmodel.AuthUiState
 import com.unishuttle.app.presentation.viewmodel.AuthViewModel
 
+private const val UNSUPPORTED_ROLE_MESSAGE = "This account type isn't available yet."
+
 /**
- * Root navigation graph.
+ * Root navigation graph with the auth guard.
  *
- * Auth gate logic:
- * - While auth state is being resolved → show a loading spinner (no flash of wrong screen).
- * - Not signed in → start on Login.
- * - Signed in as STUDENT → start on StudentMap.
- * - Signed in as DRIVER  → start on DriverDashboard.
- * - Signed in as ADMIN   → start on AdminPanel.
+ * - Loading → plain theme-background view (no flash of any screen).
+ * - SignedOut → login, back stack cleared.
+ * - SignedIn(student) → student graph only.
+ * - SignedIn(driver) → driver graph only.
+ * - Any other role → signed out with an error shown on login.
+ *
+ * The manifest declares no deep links, so the guard is the only way the role
+ * destinations can be reached — students cannot get to the driver graph and
+ * drivers cannot get to the student graph.
  */
 @Composable
 fun UniShuttleNavGraph(
@@ -39,19 +48,50 @@ fun UniShuttleNavGraph(
 ) {
     val authState by authViewModel.uiState.collectAsStateWithLifecycle()
 
-    // Show a spinner until Firebase resolves the auth state on cold launch
-    if (!authState.isAuthResolved) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    // Show nothing but the themed background until Firebase resolves the session.
+    if (authState is AuthUiState.Loading) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentAlignment = Alignment.Center,
+        ) {
             CircularProgressIndicator()
         }
         return
     }
 
-    val startDestination = when (authState.currentUser?.role) {
-        UserRole.DRIVER -> NavRoute.DriverDashboard.route
-        UserRole.ADMIN -> NavRoute.AdminPanel.route
-        UserRole.STUDENT -> NavRoute.StudentMap.route
-        null -> NavRoute.Login.route
+    val startDestination = when (val state = authState) {
+        is AuthUiState.SignedIn -> when (state.role) {
+            UserRole.STUDENT -> NavRoute.StudentMap.route
+            UserRole.DRIVER -> NavRoute.DriverDashboard.route
+            else -> NavRoute.Login.route
+        }
+        else -> NavRoute.Login.route
+    }
+
+    // Guard: react to every auth state change and clear the back stack on each
+    // transition so a role change or sign-out can never leave stale history.
+    LaunchedEffect(authState) {
+        val target = when (val state = authState) {
+            is AuthUiState.SignedIn -> when (state.role) {
+                UserRole.STUDENT -> NavRoute.StudentMap.route
+                UserRole.DRIVER -> NavRoute.DriverDashboard.route
+                // TODO(later steps): admin role setup and routing.
+                else -> {
+                    authViewModel.signOutWithError(UNSUPPORTED_ROLE_MESSAGE)
+                    null
+                }
+            }
+            is AuthUiState.SignedOut -> NavRoute.Login.route
+            AuthUiState.Loading -> null
+        }
+        if (target != null && navController.currentDestination?.route != target) {
+            navController.navigate(target) {
+                popUpTo(0) { inclusive = true }
+                launchSingleTop = true
+            }
+        }
     }
 
     NavHost(
@@ -76,36 +116,21 @@ fun UniShuttleNavGraph(
                 onNavigateToNotifications = {
                     navController.navigate(NavRoute.NotificationCenter.route)
                 },
-                onLogout = {
-                    authViewModel.logout()
-                    navController.navigate(NavRoute.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
+                onLogout = { authViewModel.logout() },
             )
         }
 
-        // ── Driver ──
+        // ── Driver (Step 1 placeholder; Step 4 replaces it) ──
         composable(NavRoute.DriverDashboard.route) {
-            DriverDashboardScreen(
-                onLogout = {
-                    authViewModel.logout()
-                    navController.navigate(NavRoute.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
+            DriverHomeScreen(
+                onLogout = { authViewModel.logout() },
             )
         }
 
-        // ── Admin ──
+        // ── Admin (unreachable in Step 1 — the guard signs unknown roles out) ──
         composable(NavRoute.AdminPanel.route) {
             AdminPanelScreen(
-                onLogout = {
-                    authViewModel.logout()
-                    navController.navigate(NavRoute.Login.route) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                },
+                onLogout = { authViewModel.logout() },
             )
         }
 
