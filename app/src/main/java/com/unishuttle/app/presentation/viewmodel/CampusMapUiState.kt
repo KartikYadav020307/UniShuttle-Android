@@ -15,6 +15,7 @@ data class CampusMapUiState(
     val routePoints: List<CampusLatLng> = emptyList(),
     val activeAlerts: List<StopAlert> = emptyList(),
     val selectedStopId: String? = null,
+    val isUsingFallbackStops: Boolean = false,
     val isLoading: Boolean = true,
     val errorMessage: String? = null,
 ) {

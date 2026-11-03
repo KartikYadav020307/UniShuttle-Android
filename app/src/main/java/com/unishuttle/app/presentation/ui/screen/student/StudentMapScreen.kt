@@ -1,10 +1,5 @@
 package com.unishuttle.app.presentation.ui.screen.student
 
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,7 +9,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +17,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Notifications
@@ -42,125 +36,79 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.JointType
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.RoundCap
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.MarkerComposable
-import com.google.maps.android.compose.Polyline
-import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberMarkerState
-import com.unishuttle.app.R
+import com.unishuttle.app.config.MapProviderConfig
+import com.unishuttle.app.domain.model.CampusLatLng
+import com.unishuttle.app.domain.model.SeatAvailability
 import com.unishuttle.app.domain.model.ShuttleLocation
+import com.unishuttle.app.domain.model.ShuttleStop
+import com.unishuttle.app.domain.model.StopAlert
+import com.unishuttle.app.domain.model.StopEta
 import com.unishuttle.app.presentation.ui.component.AlertChip
 import com.unishuttle.app.presentation.ui.component.EtaBadge
 import com.unishuttle.app.presentation.ui.component.MapFrame
 import com.unishuttle.app.presentation.ui.component.SeatMeter
-import com.unishuttle.app.presentation.ui.component.ShuttleMarker
 import com.unishuttle.app.presentation.ui.component.SignOutDialog
-import com.unishuttle.app.presentation.ui.component.StopMarker
-import com.unishuttle.app.presentation.ui.component.UniCard
+import com.unishuttle.app.presentation.ui.map.CampusMapController
+import com.unishuttle.app.presentation.ui.map.MapLibreCampusMap
 import com.unishuttle.app.presentation.ui.screen.map.CampusMapDefaults
 import com.unishuttle.app.presentation.ui.theme.UniColors
 import com.unishuttle.app.presentation.ui.theme.UniShuttleTheme
 import com.unishuttle.app.presentation.ui.theme.hardShadow
-import com.unishuttle.app.presentation.viewmodel.StudentMapViewModel
+import com.unishuttle.app.presentation.viewmodel.CampusMapViewModel
 
 /**
- * Data model for a transit stop rendered on the Campus Ink StudentMap.
+ * UI model consumed by [StopDetailSheet]; derived from live Firestore data.
+ * Kept as a separate model so the sheet stays previewable in isolation.
  */
 data class CampusStop(
     val id: String,
     val name: String,
-    val position: LatLng,
-    val nextShuttle: String = "SH-2",
-    val routeName: String = "Loop A",
-    val eta: String = "3 min",
-    val availableSeats: Int = 14,
+    val nextShuttle: String = "",
+    val routeName: String = "Campus loop",
+    val eta: String = "—",
+    val availableSeats: Int = 0,
     val totalSeats: Int = 24,
-    val routePosition: String = "Stop 3 of 7",
-    val trafficLabel: String = "Light traffic",
-    val arrivals: List<StopArrival> = listOf(
-        StopArrival(shuttleId = "SH-2", seatsFree = 14),
-        StopArrival(shuttleId = "SH-5", seatsFree = 22),
-    ),
+    val routePosition: String = "",
+    val trafficLabel: String = "",
+    val arrivals: List<StopArrival> = emptyList(),
 )
 
-private val DefaultCampusStops = listOf(
-    CampusStop(
-        id = "stop_main_gate",
-        name = "Main Gate",
-        position = LatLng(12.9692, 79.1559),
-        nextShuttle = "SH-2",
-        routeName = "Loop A",
-        eta = "3 min",
-        availableSeats = 14,
-        totalSeats = 24,
-        routePosition = "Stop 3 of 7",
-        arrivals = listOf(
-            StopArrival(shuttleId = "SH-2", seatsFree = 14),
-            StopArrival(shuttleId = "SH-5", seatsFree = 22),
-        ),
-    ),
-    CampusStop(
-        id = "stop_tech_tower",
-        name = "Technology Tower",
-        position = LatLng(12.9712, 79.1594),
-        nextShuttle = "SH-1",
-        routeName = "Loop A",
-        eta = "7 min",
-        availableSeats = 18,
-        totalSeats = 24,
-        routePosition = "Stop 4 of 7",
-        arrivals = listOf(
-            StopArrival(shuttleId = "SH-1", seatsFree = 18),
-            StopArrival(shuttleId = "SH-3", seatsFree = 9),
-        ),
-    ),
-    CampusStop(
-        id = "stop_sjt",
-        name = "Silver Jubilee Tower",
-        position = LatLng(12.9735, 79.1635),
-        nextShuttle = "SH-3",
-        routeName = "Loop B",
-        eta = "12 min",
-        availableSeats = 6,
-        totalSeats = 24,
-        routePosition = "Stop 5 of 7",
-        arrivals = listOf(
-            StopArrival(shuttleId = "SH-3", seatsFree = 6),
-            StopArrival(shuttleId = "SH-1", seatsFree = 11),
-        ),
-    ),
-    CampusStop(
-        id = "stop_prp",
-        name = "PRP Block",
-        position = LatLng(12.9665, 79.1530),
-        nextShuttle = "SH-5",
-        routeName = "Loop B",
-        eta = "5 min",
-        availableSeats = 20,
-        totalSeats = 24,
-        routePosition = "Stop 6 of 7",
-        arrivals = listOf(
-            StopArrival(shuttleId = "SH-5", seatsFree = 20),
-            StopArrival(shuttleId = "SH-2", seatsFree = 16),
-        ),
-    ),
-)
+private fun ShuttleStop.toSheetModel(
+    allStops: List<ShuttleStop>,
+    stopEtas: List<StopEta>,
+    seatAvailability: List<SeatAvailability>,
+): CampusStop {
+    val etasHere = stopEtas.filter { it.stopId == id }
+    val arrivals = etasHere
+        .sortedBy { it.durationSeconds }
+        .map { eta ->
+            val seats = seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId }
+            StopArrival(
+                shuttleId = "SH-${eta.shuttleId}",
+                seatsFree = seats?.availableSeats ?: 0,
+            )
+        }
+    val best = etasHere.minByOrNull { it.durationSeconds }
+    val bestSeats = best?.let { seatAvailability.firstOrNull { s -> s.shuttleId == it.shuttleId } }
+
+    return CampusStop(
+        id = id,
+        name = name,
+        nextShuttle = best?.shuttleId?.let { "SH-$it" }.orEmpty(),
+        eta = best?.etaText ?: "—",
+        availableSeats = bestSeats?.availableSeats ?: 0,
+        totalSeats = bestSeats?.totalSeats ?: 24,
+        routePosition = "Stop ${order} of ${allStops.size}",
+        trafficLabel = "",
+        arrivals = arrivals,
+    )
+}
 
 private val RouteOptions = listOf("All routes", "Loop A", "Loop B")
 
@@ -169,110 +117,64 @@ fun StudentMapScreen(
     onNavigateToNotifications: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: StudentMapViewModel = hiltViewModel(),
+    viewModel: CampusMapViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+    // Mirror the on-duty guard: only show shuttles updated in the last 5 minutes.
+    val activeShuttles = remember(uiState.shuttles, uiState.stopEtas.size) {
+        val cutoff = System.currentTimeMillis() - SHUTTLE_FRESHNESS_MILLIS
+        uiState.shuttles.filter { it.updatedAtMillis >= cutoff }
+    }
+
     var selectedRoute by rememberSaveable { mutableStateOf(RouteOptions.first()) }
-    var selectedStop by remember { mutableStateOf(DefaultCampusStops.first()) }
-    var isBottomSheetOpen by remember { mutableStateOf(false) }
 
     StudentMapContent(
-        activeDrivers = uiState.activeDrivers,
+        stops = uiState.stops,
+        shuttles = activeShuttles,
+        seatAvailability = uiState.seatAvailability,
+        stopEtas = uiState.stopEtas,
+        routePoints = uiState.routePoints,
+        activeAlerts = uiState.activeAlerts,
+        selectedStopId = uiState.selectedStopId,
+        isUsingFallbackStops = uiState.isUsingFallbackStops,
+        isLoading = uiState.isLoading,
+        errorMessage = uiState.errorMessage,
         selectedRoute = selectedRoute,
         onRouteChange = { selectedRoute = it },
-        selectedStop = selectedStop,
-        onStopSelected = { stop ->
-            selectedStop = stop
-            // Tapping a stop opens the StopDetail sheet
-            isBottomSheetOpen = true
-        },
+        onStopSelected = viewModel::selectStop,
+        onStopSheetDismiss = viewModel::dismissStopDetails,
+        onSubscribeAlert = viewModel::subscribeToStopAlert,
+        onUnsubscribeAlert = viewModel::unsubscribeFromStopAlert,
         onNavigateToNotifications = onNavigateToNotifications,
-        modifier = modifier,
-        isMapPreview = false,
-        isStopSheetOpen = isBottomSheetOpen,
-        onStopSheetDismiss = { isBottomSheetOpen = false },
         onLogout = onLogout,
+        modifier = modifier,
     )
 }
 
 @Composable
 fun StudentMapContent(
-    activeDrivers: List<ShuttleLocation>,
+    stops: List<ShuttleStop>,
+    shuttles: List<ShuttleLocation>,
+    seatAvailability: List<SeatAvailability>,
+    stopEtas: List<StopEta>,
+    routePoints: List<CampusLatLng>,
+    selectedStopId: String?,
+    isLoading: Boolean,
+    errorMessage: String?,
     selectedRoute: String,
     onRouteChange: (String) -> Unit,
-    selectedStop: CampusStop,
-    onStopSelected: (CampusStop) -> Unit,
+    onStopSelected: (String) -> Unit,
+    onStopSheetDismiss: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier,
+    isUsingFallbackStops: Boolean = false,
+    activeAlerts: List<StopAlert> = emptyList(),
+    onSubscribeAlert: (stopId: String, stopName: String, thresholdMinutes: Int) -> Unit = { _, _, _ -> },
+    onUnsubscribeAlert: (stopId: String) -> Unit = {},
     isMapPreview: Boolean = false,
-    isStopSheetOpen: Boolean = false,
-    onStopSheetDismiss: () -> Unit = {},
-    onLogout: () -> Unit = {},
 ) {
-    val context = LocalContext.current
-    val isDark = isSystemInDarkTheme()
-
-    // ── Polyline Cache: Fetch the Directions polyline once per route ──
-    val routePolylineCache = remember { mutableMapOf<String, List<LatLng>>() }
-    var currentPolyline by remember { mutableStateOf<List<LatLng>>(emptyList()) }
-
-    LaunchedEffect(selectedRoute) {
-        val cached = routePolylineCache[selectedRoute]
-        if (cached != null) {
-            currentPolyline = cached
-        } else {
-            // Generate/fetch polyline once per route
-            val points = when (selectedRoute) {
-                "Loop A" -> listOf(
-                    LatLng(12.9660, 79.1520),
-                    LatLng(12.9692, 79.1559),
-                    LatLng(12.9712, 79.1594),
-                    LatLng(12.9735, 79.1635),
-                )
-                "Loop B" -> listOf(
-                    LatLng(12.9642, 79.1502),
-                    LatLng(12.9665, 79.1530),
-                    LatLng(12.9692, 79.1559),
-                )
-                else -> listOf(
-                    LatLng(12.9642, 79.1502),
-                    LatLng(12.9665, 79.1530),
-                    LatLng(12.9692, 79.1559),
-                    LatLng(12.9712, 79.1594),
-                    LatLng(12.9735, 79.1635),
-                )
-            }
-            routePolylineCache[selectedRoute] = points
-            currentPolyline = points
-        }
-    }
-
-    val mapStyleOptions = remember(isDark) {
-        try {
-            MapStyleOptions.loadRawResourceStyle(
-                context,
-                if (isDark) R.raw.map_style_dark else R.raw.map_style_light,
-            )
-        } catch (_: Exception) {
-            null
-        }
-    }
-
-    val hasLocationPermission = remember {
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION,
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(
-            CampusMapDefaults.CampusCenter,
-            CampusMapDefaults.DefaultZoom,
-        )
-    }
-
     var showSignOutDialog by rememberSaveable { mutableStateOf(false) }
 
     Column(
@@ -281,7 +183,7 @@ fun StudentMapContent(
             .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding(),
     ) {
-        // ── 1. Header (64dp top padding) ──
+        // ── 1. Header ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -298,10 +200,7 @@ fun StudentMapContent(
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = "UniShuttle",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                    ),
+                    style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onBackground,
                 )
             }
@@ -310,7 +209,6 @@ fun StudentMapContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // 48dp sign-out button, same construction as the bell (surface fill)
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -336,7 +234,6 @@ fun StudentMapContent(
                     )
                 }
 
-                // 48dp Sun bell button with 2dp Ink border and 3dp hard shadow
                 Box(
                     modifier = Modifier
                         .size(48.dp)
@@ -364,7 +261,7 @@ fun StudentMapContent(
             }
         }
 
-        // ── 2. Route Chips below Header ──
+        // ── 2. Route chips (visual only — stops carry no routeId yet) ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -383,7 +280,41 @@ fun StudentMapContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // ── 3. MapFrame with 16dp side margins ──
+        // ── 3. Map ──
+        val isDark = isSystemInDarkTheme()
+        val controller = remember { CampusMapController() }
+        val density = LocalDensity.current
+        var mapReady by remember { mutableStateOf(false) }
+        var cameraFitted by rememberSaveable { mutableStateOf(false) }
+
+        LaunchedEffect(onStopSelected) {
+            controller.setOnStopClick(onStopSelected)
+        }
+        LaunchedEffect(stops, selectedStopId) {
+            controller.setStops(stops, selectedStopId)
+        }
+        LaunchedEffect(shuttles) {
+            controller.setShuttles(shuttles)
+        }
+        LaunchedEffect(routePoints, stops) {
+            when {
+                routePoints.size >= 2 -> controller.setRoute(routePoints, isFallback = false)
+                stops.size >= 2 -> controller.setRoute(
+                    stops.map { CampusLatLng(it.latitude, it.longitude) },
+                    isFallback = true,
+                )
+                else -> controller.setRoute(emptyList(), isFallback = false)
+            }
+        }
+        // Fit the camera once when the map and stop data are both ready.
+        LaunchedEffect(mapReady, stops) {
+            if (mapReady && !cameraFitted && stops.isNotEmpty()) {
+                cameraFitted = true
+                val paddingPx = with(density) { 64.dp.roundToPx() }
+                controller.fitCameraTo(stops.map { CampusLatLng(it.latitude, it.longitude) }, paddingPx)
+            }
+        }
+
         MapFrame(
             modifier = Modifier
                 .weight(1f)
@@ -391,148 +322,88 @@ fun StudentMapContent(
                 .padding(horizontal = 16.dp, vertical = 6.dp),
         ) {
             if (isMapPreview) {
-                // Map placeholder for Compose Previews
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(MaterialTheme.colorScheme.surfaceVariant),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        ShuttleMarker(label = "SH-2 · 3 min", heading = 45f)
-                        StopMarker(isSelected = true)
-                        Text(
-                            text = "Main Gate",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                        )
-                    }
+                    Text(
+                        text = "MapLibre campus map",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             } else {
-                GoogleMap(
-                    modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState,
-                    // Content padding keeps Google logo and attribution visible inside the 24dp rounded frame
-                    contentPadding = PaddingValues(start = 12.dp, bottom = 12.dp),
-                    properties = MapProperties(
-                        isTrafficEnabled = false,
-                        isMyLocationEnabled = hasLocationPermission,
-                        mapStyleOptions = mapStyleOptions,
-                    ),
-                    uiSettings = MapUiSettings(
-                        compassEnabled = false,
-                        zoomControlsEnabled = false,
-                        myLocationButtonEnabled = false,
-                        mapToolbarEnabled = false,
-                    ),
-                ) {
-                    // Route Polyline: Brick, 5dp (approx 14f), round caps
-                    if (currentPolyline.size >= 2) {
-                        Polyline(
-                            points = currentPolyline,
-                            color = MaterialTheme.colorScheme.primary,
-                            width = 14f,
-                            jointType = JointType.ROUND,
-                            startCap = RoundCap(),
-                            endCap = RoundCap(),
-                        )
-                    }
-
-                    // Stop Markers
-                    DefaultCampusStops.forEach { stop ->
-                        val isSelected = stop.id == selectedStop.id
-                        MarkerComposable(
-                            keys = arrayOf<Any>(stop.id, isSelected),
-                            state = rememberMarkerState(position = stop.position),
-                            onClick = {
-                                onStopSelected(stop)
-                                true
-                            },
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                StopMarker(
-                                    isSelected = isSelected,
-                                    contentDesc = "Stop ${stop.name}",
-                                )
-                                if (isSelected) {
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = stop.name,
-                                        style = MaterialTheme.typography.titleMedium.copy(
-                                            fontWeight = FontWeight.Bold,
-                                        ),
-                                        color = MaterialTheme.colorScheme.outline,
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    // Shuttle Markers: Animate position and rotate to heading
-                    val shuttlesToRender = if (activeDrivers.isNotEmpty()) {
-                        activeDrivers
+                MapLibreCampusMap(
+                    controller = controller,
+                    styleUri = if (isDark) {
+                        MapProviderConfig.DARK_STYLE_URL
                     } else {
-                        // Fallback sample shuttle on campus matching StudentMap.png
-                        listOf(
-                            ShuttleLocation(
-                                id = "2",
-                                latitude = 12.9705,
-                                longitude = 79.1580,
-                                heading = 45f,
-                                updatedAtMillis = System.currentTimeMillis(),
-                            ),
-                        )
-                    }
+                        MapProviderConfig.LIGHT_STYLE_URL
+                    },
+                    initialCenter = CampusMapDefaults.CampusCenter,
+                    initialZoom = CampusMapDefaults.DefaultZoom,
+                    modifier = Modifier.fillMaxSize(),
+                    onMapReady = { mapReady = true },
+                )
+            }
 
-                    shuttlesToRender.forEach { driver ->
-                        val animatedLat by animateFloatAsState(
-                            targetValue = driver.latitude.toFloat(),
-                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-                            label = "shuttle_lat",
-                        )
-                        val animatedLng by animateFloatAsState(
-                            targetValue = driver.longitude.toFloat(),
-                            animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing),
-                            label = "shuttle_lng",
-                        )
-
-                        MarkerComposable(
-                            keys = arrayOf<Any>(driver.id),
-                            state = rememberMarkerState(
-                                position = LatLng(animatedLat.toDouble(), animatedLng.toDouble()),
-                            ),
-                            onClick = { true },
-                        ) {
-                            ShuttleMarker(
-                                label = "SH-${driver.id} · 3 min",
-                                heading = driver.heading,
-                            )
-                        }
-                    }
+            // Loading / error status strip sits at the top of the map frame.
+            val status = when {
+                stops.isEmpty() && errorMessage != null -> errorMessage
+                stops.isEmpty() && isLoading -> "Loading campus…"
+                else -> null
+            }
+            if (status != null) {
+                Text(
+                    text = status,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 12.dp),
+                )
+            } else if (isUsingFallbackStops) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 10.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(UniColors.Sun)
+                        .border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(999.dp))
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                ) {
+                    Text(
+                        text = "⚡ Offline Mode · Static campus stops",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = UniColors.Ink,
+                    )
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        // ── 4. Bottom Card: UniCard with 16dp margins ──
-        UniCard(
+        // ── 4. Bottom card ──
+        val displayStop = stops.firstOrNull { it.id == selectedStopId } ?: stops.firstOrNull()
+        val bestEta = displayStop?.let { stop ->
+            stopEtas.filter { it.stopId == stop.id }.minByOrNull { it.durationSeconds }
+        }
+        val displaySeats = bestEta?.let { eta ->
+            seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId }
+        }
+
+        com.unishuttle.app.presentation.ui.component.UniCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 12.dp),
-            onClick = { onStopSelected(selectedStop) },
+            onClick = displayStop?.let { stop -> { onStopSelected(stop.id) } },
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                // Top row: Stop Name + Next Shuttle & EtaBadge
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -540,30 +411,26 @@ fun StudentMapContent(
                 ) {
                     Column {
                         Text(
-                            text = selectedStop.name,
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 22.sp,
-                            ),
+                            text = displayStop?.name ?: "No stops yet",
+                            style = MaterialTheme.typography.titleLarge,
                             color = MaterialTheme.colorScheme.onSurface,
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = "Next: ${selectedStop.nextShuttle} · ${selectedStop.routeName}",
+                            text = bestEta?.let { "Next: SH-${it.shuttleId}" } ?: "Waiting for live shuttles",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
 
                     EtaBadge(
-                        text = selectedStop.eta,
+                        text = bestEta?.etaText ?: "—",
                         showIcon = false,
                     )
                 }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Seats free row + SeatMeter
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -571,27 +438,38 @@ fun StudentMapContent(
                 ) {
                     Text(
                         text = "Seats free",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            fontWeight = FontWeight.Medium,
-                        ),
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Text(
-                        text = "${selectedStop.availableSeats} / ${selectedStop.totalSeats}",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                        ),
+                        text = displaySeats?.let { "${it.availableSeats} / ${it.totalSeats}" } ?: "—",
+                        style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
-                // 12dp SeatMeter
-                SeatMeter(
-                    occupiedSeats = selectedStop.availableSeats,
-                    totalSeats = selectedStop.totalSeats,
-                    showHeader = false,
-                )
+                if (displaySeats != null) {
+                    SeatMeter(
+                        occupiedSeats = displaySeats.availableSeats,
+                        totalSeats = displaySeats.totalSeats,
+                        showHeader = false,
+                    )
+                }
             }
+        }
+
+        // ── 5. Stop detail sheet ──
+        val sheetStop = stops.firstOrNull { it.id == selectedStopId }
+        if (sheetStop != null) {
+            val activeAlert = activeAlerts.firstOrNull { it.stopId == sheetStop.id }
+            StopDetailSheet(
+                stop = sheetStop.toSheetModel(stops, stopEtas, seatAvailability),
+                isAlertArmed = activeAlert != null,
+                armedThresholdMinutes = activeAlert?.thresholdMinutes,
+                onSubscribeAlert = onSubscribeAlert,
+                onUnsubscribeAlert = onUnsubscribeAlert,
+                onDismiss = onStopSheetDismiss,
+            )
         }
 
         if (showSignOutDialog) {
@@ -603,29 +481,47 @@ fun StudentMapContent(
                 onDismiss = { showSignOutDialog = false },
             )
         }
-
-        if (isStopSheetOpen) {
-            StopDetailSheet(
-                stop = selectedStop,
-                onDismiss = onStopSheetDismiss,
-            )
-        }
     }
 }
 
+private const val SHUTTLE_FRESHNESS_MILLIS = 5 * 60 * 1_000L
+
 // ── Light and Dark Previews ──
+
+private val PreviewStops = listOf(
+    ShuttleStop(id = "stop_main_gate", name = "Main Gate", latitude = 12.9692, longitude = 79.1559, order = 1),
+    ShuttleStop(id = "stop_tech_tower", name = "Technology Tower", latitude = 12.9712, longitude = 79.1594, order = 2),
+    ShuttleStop(id = "stop_sjt", name = "Silver Jubilee Tower", latitude = 12.9735, longitude = 79.1635, order = 3),
+)
+
+private val PreviewEtas = listOf(
+    StopEta(shuttleId = "2", stopId = "stop_main_gate", etaText = "3 min", durationSeconds = 180),
+    StopEta(shuttleId = "2", stopId = "stop_tech_tower", etaText = "7 min", durationSeconds = 420),
+)
+
+private val PreviewSeats = listOf(
+    SeatAvailability(shuttleId = "2", availableSeats = 14, totalSeats = 24, updatedAtMillis = 0),
+)
 
 @Preview(name = "StudentMap - Light", showBackground = true, widthDp = 380, heightDp = 820)
 @Composable
 fun StudentMapPreviewLight() {
     UniShuttleTheme(darkTheme = false) {
         StudentMapContent(
-            activeDrivers = emptyList(),
+            stops = PreviewStops,
+            shuttles = emptyList(),
+            seatAvailability = PreviewSeats,
+            stopEtas = PreviewEtas,
+            routePoints = emptyList(),
+            selectedStopId = null,
+            isLoading = false,
+            errorMessage = null,
             selectedRoute = "All routes",
             onRouteChange = {},
-            selectedStop = DefaultCampusStops.first(),
             onStopSelected = {},
+            onStopSheetDismiss = {},
             onNavigateToNotifications = {},
+            onLogout = {},
             isMapPreview = true,
         )
     }
@@ -636,12 +532,20 @@ fun StudentMapPreviewLight() {
 fun StudentMapPreviewDark() {
     UniShuttleTheme(darkTheme = true) {
         StudentMapContent(
-            activeDrivers = emptyList(),
+            stops = PreviewStops,
+            shuttles = emptyList(),
+            seatAvailability = PreviewSeats,
+            stopEtas = PreviewEtas,
+            routePoints = emptyList(),
+            selectedStopId = null,
+            isLoading = false,
+            errorMessage = null,
             selectedRoute = "All routes",
             onRouteChange = {},
-            selectedStop = DefaultCampusStops.first(),
             onStopSelected = {},
+            onStopSheetDismiss = {},
             onNavigateToNotifications = {},
+            onLogout = {},
             isMapPreview = true,
         )
     }

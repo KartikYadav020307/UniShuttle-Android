@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.android.gms.maps.model.LatLng
 import com.unishuttle.app.presentation.ui.component.AlertChip
 import com.unishuttle.app.presentation.ui.component.EtaBadge
 import com.unishuttle.app.presentation.ui.component.SeatMeter
@@ -60,6 +59,10 @@ fun StopDetailSheet(
     stop: CampusStop,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    isAlertArmed: Boolean = false,
+    armedThresholdMinutes: Int? = null,
+    onSubscribeAlert: (stopId: String, stopName: String, thresholdMinutes: Int) -> Unit = { _, _, _ -> },
+    onUnsubscribeAlert: (stopId: String) -> Unit = {},
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -72,23 +75,38 @@ fun StopDetailSheet(
         dragHandle = null,
     ) {
         UniBottomSheet {
-            StopDetailSheetContent(stop = stop)
+            StopDetailSheetContent(
+                stop = stop,
+                isAlertArmed = isAlertArmed,
+                armedThresholdMinutes = armedThresholdMinutes,
+                onSubscribeAlert = onSubscribeAlert,
+                onUnsubscribeAlert = onUnsubscribeAlert,
+            )
         }
     }
 }
 
 @Composable
-private fun StopDetailSheetContent(stop: CampusStop) {
+private fun StopDetailSheetContent(
+    stop: CampusStop,
+    isAlertArmed: Boolean,
+    armedThresholdMinutes: Int?,
+    onSubscribeAlert: (stopId: String, stopName: String, thresholdMinutes: Int) -> Unit,
+    onUnsubscribeAlert: (stopId: String) -> Unit,
+) {
     val haptics = LocalHapticFeedback.current
 
     var selectedArrivalId by rememberSaveable(stop.id) {
         mutableStateOf(stop.arrivals.firstOrNull()?.shuttleId)
     }
-    var selectedThreshold by rememberSaveable(stop.id) { mutableStateOf(AlertThresholds.last()) }
-    var isAlertArmed by rememberSaveable(stop.id) { mutableStateOf(false) }
+    var selectedThreshold by rememberSaveable(stop.id, armedThresholdMinutes) {
+        mutableStateOf(armedThresholdMinutes ?: AlertThresholds.last())
+    }
 
     val selectedArrival = stop.arrivals.firstOrNull { it.shuttleId == selectedArrivalId }
         ?: stop.arrivals.firstOrNull()
+
+    val isArmedAtCurrentThreshold = isAlertArmed && selectedThreshold == armedThresholdMinutes
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -113,11 +131,20 @@ private fun StopDetailSheetContent(stop: CampusStop) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             EtaBadge(text = "${stop.eta} away")
-            EtaBadge(
-                text = stop.trafficLabel,
-                containerColor = UniColors.Sky,
-                showIcon = false,
-            )
+            if (stop.trafficLabel.isNotBlank()) {
+                EtaBadge(
+                    text = stop.trafficLabel,
+                    containerColor = UniColors.Sky,
+                    showIcon = false,
+                )
+            }
+            if (isAlertArmed && armedThresholdMinutes != null) {
+                EtaBadge(
+                    text = "Alert armed (${armedThresholdMinutes}m)",
+                    containerColor = UniColors.Sun,
+                    showIcon = true,
+                )
+            }
         }
 
         stop.arrivals.forEach { arrival ->
@@ -154,7 +181,6 @@ private fun StopDetailSheetContent(stop: CampusStop) {
                     onClick = {
                         haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         selectedThreshold = minutes
-                        isAlertArmed = false
                     },
                 )
             }
@@ -163,16 +189,20 @@ private fun StopDetailSheetContent(stop: CampusStop) {
         Spacer(modifier = Modifier.height(4.dp))
 
         UniButton(
-            text = if (isAlertArmed) {
-                "Alert set at $selectedThreshold min"
-            } else {
-                "Alert me at $selectedThreshold min"
+            text = when {
+                isArmedAtCurrentThreshold -> "Cancel alert (${armedThresholdMinutes} min)"
+                isAlertArmed -> "Update alert to $selectedThreshold min"
+                else -> "Alert me at $selectedThreshold min"
             },
             onClick = {
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                isAlertArmed = true
+                if (isArmedAtCurrentThreshold) {
+                    onUnsubscribeAlert(stop.id)
+                } else {
+                    onSubscribeAlert(stop.id, stop.name, selectedThreshold)
+                }
             },
-            variant = if (isAlertArmed) UniButtonVariant.Secondary else UniButtonVariant.Primary,
+            variant = if (isArmedAtCurrentThreshold) UniButtonVariant.Secondary else UniButtonVariant.Primary,
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -230,7 +260,6 @@ private fun ArrivalRow(
 private val PreviewStop = CampusStop(
     id = "stop_main_gate",
     name = "Main Gate",
-    position = LatLng(12.9692, 79.1559),
 )
 
 @Preview(name = "StopDetailSheet - Light", showBackground = true, widthDp = 380, heightDp = 820)
@@ -244,7 +273,13 @@ fun StopDetailSheetPreviewLight() {
                 .padding(vertical = 24.dp),
         ) {
             UniBottomSheet {
-                StopDetailSheetContent(stop = PreviewStop)
+                StopDetailSheetContent(
+                    stop = PreviewStop,
+                    isAlertArmed = false,
+                    armedThresholdMinutes = null,
+                    onSubscribeAlert = { _, _, _ -> },
+                    onUnsubscribeAlert = {},
+                )
             }
         }
     }
@@ -261,7 +296,13 @@ fun StopDetailSheetPreviewDark() {
                 .padding(vertical = 24.dp),
         ) {
             UniBottomSheet {
-                StopDetailSheetContent(stop = PreviewStop)
+                StopDetailSheetContent(
+                    stop = PreviewStop,
+                    isAlertArmed = true,
+                    armedThresholdMinutes = 5,
+                    onSubscribeAlert = { _, _, _ -> },
+                    onUnsubscribeAlert = {},
+                )
             }
         }
     }

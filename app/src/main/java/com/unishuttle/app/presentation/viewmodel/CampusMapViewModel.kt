@@ -9,6 +9,7 @@ import com.unishuttle.app.domain.repository.RouteRepository
 import com.unishuttle.app.domain.repository.SeatAvailabilityRepository
 import com.unishuttle.app.domain.repository.ShuttleLocationRepository
 import com.unishuttle.app.domain.repository.ShuttleStopRepository
+import com.unishuttle.app.presentation.ui.screen.map.CampusMapDefaults
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -87,17 +88,24 @@ class CampusMapViewModel @Inject constructor(
         viewModelScope.launch {
             shuttleStopRepository.observeStops()
                 .catch { error ->
+                    val fallback = CampusMapDefaults.DefaultStops
                     _uiState.update {
                         it.copy(
+                            stops = fallback,
+                            isUsingFallbackStops = true,
                             isLoading = false,
-                            errorMessage = error.message ?: "Unable to load shuttle stops.",
+                            errorMessage = null,
                         )
                     }
+                    loadRoute(fallback)
+                    refreshEtas(force = true)
                 }
                 .collect { stops ->
+                    val isFallback = stops.isNotEmpty() && stops == CampusMapDefaults.DefaultStops
                     _uiState.update {
                         it.copy(
                             stops = stops,
+                            isUsingFallbackStops = isFallback,
                             isLoading = false,
                             errorMessage = null,
                         )

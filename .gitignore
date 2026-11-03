@@ -19,3 +19,12 @@ local.properties
 # IDE files
 .idea/
 *.iml
+*.code-workspace
+
+# Local SQLite database dumps & scratch binaries
+*.db
+*.db-wal
+*.db-shm
+
+# Root test captures & screenshots
+/*.png

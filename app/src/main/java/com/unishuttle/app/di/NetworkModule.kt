@@ -1,6 +1,7 @@
 package com.unishuttle.app.di
 
-import com.unishuttle.app.data.remote.api.DirectionsApiService
+import com.unishuttle.app.config.MapProviderConfig
+import com.unishuttle.app.data.remote.api.OsrmApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,13 +27,13 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
         Retrofit.Builder()
-            .baseUrl("https://maps.googleapis.com/")
+            .baseUrl(MapProviderConfig.OSRM_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
     @Provides
     @Singleton
-    fun provideDirectionsApiService(retrofit: Retrofit): DirectionsApiService =
-        retrofit.create(DirectionsApiService::class.java)
+    fun provideOsrmApiService(retrofit: Retrofit): OsrmApiService =
+        retrofit.create(OsrmApiService::class.java)
 }

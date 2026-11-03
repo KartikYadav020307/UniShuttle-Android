@@ -108,8 +108,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-crashlytics")
 
-    implementation("com.google.maps.android:maps-compose:8.4.0")
-    implementation("com.google.android.gms:play-services-maps:20.0.0")
+    implementation("org.maplibre.gl:android-sdk:13.7.1")
     implementation("com.google.android.gms:play-services-location:21.4.0")
 
     implementation("androidx.room:room-runtime:2.8.5")

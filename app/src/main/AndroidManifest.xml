@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -36,10 +39,6 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="${MAPS_API_KEY}" />
 
         <service
             android:name=".driver.DriverLocationService"

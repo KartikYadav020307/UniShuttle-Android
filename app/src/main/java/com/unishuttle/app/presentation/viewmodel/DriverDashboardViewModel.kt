@@ -65,7 +65,7 @@ class DriverDashboardViewModel @Inject constructor(
             viewModelScope.launch {
                 // Write a sentinel "off-duty" value (updatedAtMillis = 0) so Firestore
                 // listeners know this shuttle is no longer active.
-                // The StudentMapViewModel already filters by staleness, so this is belt-and-suspenders.
+                // The student map filters stale shuttles at render time, so this is belt-and-suspenders.
                 runCatching {
                     seatAvailabilityRepository.updateSeatAvailability(
                         shuttleId = driver.shuttleId,

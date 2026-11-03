@@ -4,8 +4,8 @@ import com.unishuttle.app.data.repository.FirebaseAuthRepository
 import com.unishuttle.app.data.repository.FirebaseSeatAvailabilityRepository
 import com.unishuttle.app.data.repository.FirebaseShuttleLocationRepository
 import com.unishuttle.app.data.repository.FirebaseShuttleStopRepository
-import com.unishuttle.app.data.repository.GoogleDirectionsRouteRepository
 import com.unishuttle.app.data.repository.LocalNotificationRepository
+import com.unishuttle.app.data.repository.OsrmRoutingRepository
 import com.unishuttle.app.domain.repository.AuthRepository
 import com.unishuttle.app.domain.repository.NotificationRepository
 import com.unishuttle.app.domain.repository.RouteRepository
@@ -36,7 +36,7 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindRouteRepository(
-        repository: GoogleDirectionsRouteRepository,
+        repository: OsrmRoutingRepository,
     ): RouteRepository
 
     @Binds
