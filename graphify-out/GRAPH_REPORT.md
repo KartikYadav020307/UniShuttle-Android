@@ -1,192 +1,185 @@
-# Graph Report - C:/Users/yamle/OneDrive/Desktop/UniShuttle Android  (2026-10-25)
+# Graph Report - .  (2026-11-01)
 
 ## Corpus Check
-- Corpus is ~26,044 words - fits in a single context window. You may not need a graph.
+- Corpus is ~26,645 words - fits in a single context window. You may not need a graph.
 
 ## Summary
-- 594 nodes · 1148 edges · 31 communities (28 shown, 3 thin omitted)
-- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 126 edges (avg confidence: 0.82)
-- Token cost: 2,789,453 input · 0 output
+- 482 nodes · 904 edges · 38 communities (25 shown, 13 thin omitted)
+- Extraction: 93% EXTRACTED · 7% INFERRED · 0% AMBIGUOUS · INFERRED: 63 edges (avg confidence: 0.8)
+- Token cost: 1,530 input · 1,661 output
 
 ## Community Hubs (Navigation)
-- [[_COMMUNITY_Login UI & Components|Login UI & Components]]
-- [[_COMMUNITY_Local Notification Storage|Local Notification Storage]]
-- [[_COMMUNITY_Campus Map Screen|Campus Map Screen]]
-- [[_COMMUNITY_Backend Rules & Build Config|Backend Rules & Build Config]]
-- [[_COMMUNITY_Auth DI & User Model|Auth DI & User Model]]
-- [[_COMMUNITY_Driver Location Service|Driver Location Service]]
-- [[_COMMUNITY_Directions & ETA Network|Directions & ETA Network]]
-- [[_COMMUNITY_Firestore DTOs & Repos|Firestore DTOs & Repos]]
-- [[_COMMUNITY_Auth State & Admin Panel|Auth State & Admin Panel]]
-- [[_COMMUNITY_Campus Ink Components|Campus Ink Components]]
-- [[_COMMUNITY_App Entry & Messaging|App Entry & Messaging]]
-- [[_COMMUNITY_Navigation Routes|Navigation Routes]]
-- [[_COMMUNITY_Cloud Functions Package|Cloud Functions Package]]
-- [[_COMMUNITY_Map Data ViewModels|Map Data ViewModels]]
-- [[_COMMUNITY_TypeScript Config|TypeScript Config]]
-- [[_COMMUNITY_Driver Duty & Seats|Driver Duty & Seats]]
-- [[_COMMUNITY_Firebase Providers|Firebase Providers]]
-- [[_COMMUNITY_Campus Ink Theme|Campus Ink Theme]]
-- [[_COMMUNITY_Arrival Cloud Function|Arrival Cloud Function]]
-- [[_COMMUNITY_Driver Seat Counter|Driver Seat Counter]]
-- [[_COMMUNITY_Transit Domain Models|Transit Domain Models]]
-- [[_COMMUNITY_Driver Cockpit Screens|Driver Cockpit Screens]]
-- [[_COMMUNITY_Campus Map Defaults|Campus Map Defaults]]
-- [[_COMMUNITY_Notification Cards|Notification Cards]]
-- [[_COMMUNITY_Seat Meter Widgets|Seat Meter Widgets]]
-- [[_COMMUNITY_Alert Pickers|Alert Pickers]]
-- [[_COMMUNITY_Color Tokens|Color Tokens]]
+- [[_COMMUNITY_UI Components & Authentication Screens|UI Components & Authentication Screens]]
+- [[_COMMUNITY_Local Notification Storage & Alerts|Local Notification Storage & Alerts]]
+- [[_COMMUNITY_Notification State & Models|Notification State & Models]]
+- [[_COMMUNITY_Map Controller & Location Services|Map Controller & Location Services]]
+- [[_COMMUNITY_Seat Availability & Route Data|Seat Availability & Route Data]]
+- [[_COMMUNITY_Map & Driver ViewModels|Map & Driver ViewModels]]
+- [[_COMMUNITY_User Authentication & Domain Models|User Authentication & Domain Models]]
+- [[_COMMUNITY_Role-Based Access & Admin Panel|Role-Based Access & Admin Panel]]
+- [[_COMMUNITY_Driver Location Service & Tracking|Driver Location Service & Tracking]]
+- [[_COMMUNITY_Driver Dashboard & Seat Controls|Driver Dashboard & Seat Controls]]
+- [[_COMMUNITY_Cloud Functions Configuration|Cloud Functions Configuration]]
+- [[_COMMUNITY_OSRM Routing & Network Client|OSRM Routing & Network Client]]
+- [[_COMMUNITY_Repository Dependency Injection|Repository Dependency Injection]]
+- [[_COMMUNITY_TypeScript Build Configuration|TypeScript Build Configuration]]
+- [[_COMMUNITY_Navigation Routes & Destinations|Navigation Routes & Destinations]]
+- [[_COMMUNITY_Backend Geo-proximity Cloud Functions|Backend Geo-proximity Cloud Functions]]
+- [[_COMMUNITY_Map Provider & OpenFreeMap Config|Map Provider & OpenFreeMap Config]]
+- [[_COMMUNITY_Room Database & Persistence Module|Room Database & Persistence Module]]
+- [[_COMMUNITY_Firebase Infrastructure Providers|Firebase Infrastructure Providers]]
+- [[_COMMUNITY_Main Application Activity & Permissions|Main Application Activity & Permissions]]
+- [[_COMMUNITY_Application Initialization & FCM Setup|Application Initialization & FCM Setup]]
+- [[_COMMUNITY_Firebase Auth Injection|Firebase Auth Injection]]
+- [[_COMMUNITY_Domain Auth Specifications & Plans|Domain Auth Specifications & Plans]]
+- [[_COMMUNITY_Firestore Seat Availability DTO|Firestore Seat Availability DTO]]
+- [[_COMMUNITY_Firestore Shuttle Stop DTO|Firestore Shuttle Stop DTO]]
+- [[_COMMUNITY_Campus Map Coordinates Defaults|Campus Map Coordinates Defaults]]
+- [[_COMMUNITY_Role Auth & Driver Privacy Spec|Role Auth & Driver Privacy Spec]]
+- [[_COMMUNITY_Theme Colors & Palette|Theme Colors & Palette]]
+- [[_COMMUNITY_Google Maps Migration Architecture|Google Maps Migration Architecture]]
+- [[_COMMUNITY_Phase 0 Project Setup Roadmap|Phase 0 Project Setup Roadmap]]
+- [[_COMMUNITY_Phase 1 Map Tracking Roadmap|Phase 1 Map Tracking Roadmap]]
+- [[_COMMUNITY_Phase 2 Seat & ETA Roadmap|Phase 2 Seat & ETA Roadmap]]
+- [[_COMMUNITY_Phase 3 Notifications Roadmap|Phase 3 Notifications Roadmap]]
+- [[_COMMUNITY_Clean Architecture & MVI Guidelines|Clean Architecture & MVI Guidelines]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `CampusMapViewModel` - 25 edges
-2. `AuthViewModel` - 24 edges
-3. `UniShuttleTheme()` - 23 edges
-4. `LocalNotificationRepository` - 20 edges
-5. `DriverDashboardViewModel` - 20 edges
-6. `StudentMapContent()` - 18 edges
-7. `NotificationDao` - 16 edges
-8. `FirebaseAuthRepository` - 16 edges
-9. `SeatAvailability` - 16 edges
-10. `StudentMapContent` - 15 edges
+1. `CampusMapController` - 26 edges
+2. `UniShuttleTheme()` - 23 edges
+3. `StudentMapContent()` - 22 edges
+4. `AuthViewModel` - 21 edges
+5. `CampusMapViewModel` - 16 edges
+6. `NotificationDao` - 14 edges
+7. `SeatAvailability` - 13 edges
+8. `FirebaseAuthRepository` - 12 edges
+9. `DriverLocationService` - 12 edges
+10. `LoginContent()` - 12 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `NotificationCenterViewModel` --implements--> `Clean Architecture + MVI/MVVM (Unidirectional Data Flow)`  [INFERRED]
-  app/src/main/java/com/unishuttle/app/presentation/viewmodel/NotificationCenterViewModel.kt → UNISHUTTLE_CONTEXT_AND_SYSTEM_DESIGN.md
-- `StudentMapViewModel` --implements--> `Clean Architecture + MVI/MVVM (Unidirectional Data Flow)`  [INFERRED]
-  app/src/main/java/com/unishuttle/app/presentation/viewmodel/StudentMapViewModel.kt → UNISHUTTLE_CONTEXT_AND_SYSTEM_DESIGN.md
-- `Google Maps Dark Style (map_style_dark.json)` --conceptually_related_to--> `UniShuttle Master System Context & Design Specification`  [INFERRED]
-  app/src/main/res/raw/map_style_dark.json → UNISHUTTLE_CONTEXT_AND_SYSTEM_DESIGN.md
-- `Google Maps Light Style (map_style_light.json)` --conceptually_related_to--> `UniShuttle Master System Context & Design Specification`  [INFERRED]
-  app/src/main/res/raw/map_style_light.json → UNISHUTTLE_CONTEXT_AND_SYSTEM_DESIGN.md
-- `Phase 3: Notifications + Alerts` --references--> `functions package.json (unishuttle-functions)`  [EXTRACTED]
-  docs/phase-3-notifications-alerts.md → functions/package.json
+- `MapProviderConfig` --references--> `OpenFreeMap`  [EXTRACTED]
+  app/src/main/java/com/unishuttle/app/config/MapProviderConfig.kt → docs/map-and-routing.md
+- `MapProviderConfig` --references--> `OSRM (Open Source Routing Machine)`  [EXTRACTED]
+  app/src/main/java/com/unishuttle/app/config/MapProviderConfig.kt → docs/map-and-routing.md
+- `Google Sign-in, Role Routing, Sign-out Implementation Plan` --references--> `UniShuttle Master System Context & Design Specification`  [INFERRED]
+  .zcode/plans/plan-session_fe4a432de895d4b69e4c75aeb41049d8.md → UNISHUTTLE_CONTEXT_AND_SYSTEM_DESIGN.md
+- `DriverDashboardScreen()` --calls--> `SeatAvailability`  [INFERRED]
+  app/src/main/java/com/unishuttle/app/presentation/ui/screen/driver/DriverDashboardScreen.kt → app/src/main/java/com/unishuttle/app/domain/model/SeatAvailability.kt
+- `DriverSeatCounterScreen()` --calls--> `SeatAvailability`  [INFERRED]
+  app/src/main/java/com/unishuttle/app/presentation/ui/screen/driver/DriverSeatCounterScreen.kt → app/src/main/java/com/unishuttle/app/domain/model/SeatAvailability.kt
 
 ## Import Cycles
 - None detected.
 
 ## Hyperedges (group relationships)
-- **Seat Occupancy Display Family (threshold-colored animated bars)** — seatmeter, seatavailabilitymeter, seatavailability [INFERRED 0.85]
-- **Neo-Brutalist Component Kit (2dp ink borders, hard offset shadows, pill shapes, press-offset animation)** — unicard, unibutton, alertchip, roletoggle, shuttlemarker, unibottomsheet [INFERRED 0.85]
-- **Campus Ink design system (palette, type, shapes, hard shadows)** — color_UniColors, theme_UniTypography, theme_UniShapes, theme_UniShuttleTheme, theme_hardShadow, theme_campus_ink_design [EXTRACTED 1.00]
-- **Proximity Alert Pipeline (RTDB trigger, Haversine check, threshold map, FCM topic push)** — index_onshuttlelocationupdate, index_haversinedistance, index_thresholdmap, index_fcm_topic_convention [EXTRACTED 0.95]
+- **Realtime Shuttle Tracking Flow (driver RTDB writes feed student map and Cloud Function under RTDB rules)** — index_rtdb_shuttles_stream, studentmapviewmodel_studentmapviewmodel, index_onshuttlelocationupdate, database_rules_json [INFERRED 0.85]
+- **Map and Routing Infrastructure** — map_and_routing_maplibre_native_android, map_and_routing_osrm, map_and_routing_openfreemap, mapproviderconfig_map_provider_config [EXTRACTED 1.00]
 
-## Communities (31 total, 3 thin omitted)
+## Communities (38 total, 13 thin omitted)
 
-### Community 0 - "Login UI & Components"
-Cohesion: 0.05
-Nodes (65): GoogleSignInButton(), LoginContent(), LoginPreviewDark(), LoginPreviewLight(), LoginScreen(), ShuttleIcon(), RegisterScreen(), Boolean (+57 more)
-
-### Community 1 - "Local Notification Storage"
+### Community 0 - "UI Components & Authentication Screens"
 Cohesion: 0.06
-Nodes (26): NotificationDao, UniShuttleDatabase, DatabaseModule, NotificationEntity, NotificationPreferenceEntity, StopAlertEntity, FirebaseMessagingService, NotificationItem (+18 more)
+Nodes (52): GoogleSignInButton(), LoginContent(), LoginPreviewDark(), LoginPreviewLight(), LoginScreen(), ShuttleIcon(), RegisterScreen(), BoxScope (+44 more)
 
-### Community 2 - "Campus Map Screen"
+### Community 1 - "Local Notification Storage & Alerts"
+Cohesion: 0.07
+Nodes (17): AlertTimePicker(), NotificationDao, Double, FirebaseShuttleLocationDto, NotificationPreferenceEntity, StopAlertEntity, FirebaseMessagingService, Float (+9 more)
+
+### Community 2 - "Notification State & Models"
+Cohesion: 0.11
+Nodes (15): NotificationEntity, Flow, List, NotificationItem, NotificationType, NotificationPreference, StopAlert, EmptyState() (+7 more)
+
+### Community 3 - "Map Controller & Location Services"
+Cohesion: 0.09
+Nodes (14): Bitmap, Boolean, Context, LocationModule, Feature, FusedLocationProviderClient, LatLng, LineString (+6 more)
+
+### Community 4 - "Seat Availability & Route Data"
+Cohesion: 0.11
+Nodes (16): com, SeatMeter(), SeatMeterPreviewDark(), toDomain(), SeatAvailability, ShuttleLocation, ShuttleStop, StopEta (+8 more)
+
+### Community 5 - "Map & Driver ViewModels"
 Cohesion: 0.08
-Nodes (23): Float, Flow, List, AnimatedShuttleMarker(), CampusMapScreen(), MapStatusPill(), markerSnippet(), normalizeHeading() (+15 more)
+Nodes (9): Job, StateFlow, ViewModel, CampusMapUiState, CampusMapViewModel, DriverSeatUiState, DriverSeatViewModel, NotificationCenterUiState (+1 more)
 
-### Community 3 - "Backend Rules & Build Config"
-Cohesion: 0.07
-Nodes (36): Root build.gradle.kts (AGP 9.4.0, Kotlin 2.3.21, Hilt 2.60.1), RTDB Security Rules (database.rules.json), FirebaseDatabase singleton, FirebaseShuttleLocationRepository, functions package.json (unishuttle-functions), functions tsconfig.json (strict, outDir lib), Institutional Domain Lock (@vitstudent.ac.in), Google Sign-In Setup Guide (Credential Manager) (+28 more)
+### Community 6 - "User Authentication & Domain Models"
+Cohesion: 0.16
+Nodes (12): Exception, AppUser, AuthRepository, AuthState, ProfileUnavailable, SignedIn, SignedOut, DomainRestrictionException (+4 more)
 
-### Community 4 - "Auth DI & User Model"
-Cohesion: 0.09
-Nodes (17): FirebaseAuth singleton, AuthModule, RepositoryModule, Exception, FirebaseAuth, AppUser, UserRole, AuthRepository (+9 more)
+### Community 7 - "Role-Based Access & Admin Panel"
+Cohesion: 0.15
+Nodes (9): AdminPanelScreen(), AdminTile(), GetCredentialResponse, UserRole, AuthUiState, AuthViewModel, Loading, SignedIn (+1 more)
 
-### Community 5 - "Driver Location Service"
-Cohesion: 0.09
-Nodes (17): BitmapDescriptor, AnimatedShuttleMarker, AlertTimePicker(), Context, LocationModule, DriverLocationService, startIntent(), FusedLocationProviderClient (+9 more)
+### Community 8 - "Driver Location Service & Tracking"
+Cohesion: 0.14
+Nodes (8): DriverLocationService, startIntent(), IBinder, Intent, Notification, FirebaseShuttleLocationRepository, ShuttleLocationRepository, Service
 
-### Community 6 - "Directions & ETA Network"
-Cohesion: 0.07
-Nodes (18): DirectionsApiService, App Build Configuration (build.gradle.kts), Campus Domain Lock (@vitstudent.ac.in), Cumulative Leg-Duration ETA Computation, NetworkModule, DirectionsLegDto, DirectionsPolylineDto, DirectionsResponseDto (+10 more)
+### Community 9 - "Driver Dashboard & Seat Controls"
+Cohesion: 0.15
+Nodes (9): AndroidViewModel, labelText(), meterColor(), SeatAvailabilityMeter(), statusText(), DriverDashboardScreen(), DriverSeatCounterScreen(), DriverDashboardUiState (+1 more)
 
-### Community 7 - "Firestore DTOs & Repos"
-Cohesion: 0.10
-Nodes (12): Double, FirebaseShuttleLocationDto, FirestoreSeatAvailabilityDto, FirestoreShuttleStopDto, FirebaseMappers, Long, FirebaseSeatAvailabilityRepository, FirebaseShuttleLocationRepository (+4 more)
-
-### Community 8 - "Auth State & Admin Panel"
-Cohesion: 0.13
-Nodes (14): AdminPanelScreen(), AdminTile(), AppUser (domain model), GetCredentialResponse, LoginScreen, RegisterScreen, Google Sign-In Auto-Registration, SignOutDialog (+6 more)
-
-### Community 9 - "Campus Ink Components"
-Cohesion: 0.13
-Nodes (21): AlertChip, AlertTimePicker, CampusMapDefaults (VIT Vellore), CampusMapScreen, ShuttleRoutePolyline, StopMarker (CampusMapScreen private), DriverHomeScreen, EtaBadge (+13 more)
-
-### Community 10 - "App Entry & Messaging"
-Cohesion: 0.12
-Nodes (13): MainActivity, UniShuttleApplication, Application, Bundle, ComponentActivity, DriverLocationService, EtaBadge, MapFrame (+5 more)
-
-### Community 11 - "Navigation Routes"
-Cohesion: 0.17
-Nodes (19): AdminPanelScreen, AuthUiState (Loading/SignedIn/SignedOut), LoginScreen / LoginContent, GoogleSignInButton, ShuttleIcon (canvas illustration), AdminPanel, DriverDashboard, Login (+11 more)
-
-### Community 12 - "Cloud Functions Package"
+### Community 10 - "Cloud Functions Configuration"
 Cohesion: 0.12
 Nodes (16): dependencies, firebase-admin, firebase-functions, description, devDependencies, typescript, engines, node (+8 more)
 
-### Community 13 - "Map Data ViewModels"
-Cohesion: 0.18
-Nodes (4): ETA Refresh Throttling (15s), Job, ShuttleStopRepository, CampusMapViewModel
+### Community 11 - "OSRM Routing & Network Client"
+Cohesion: 0.15
+Nodes (8): OsrmApiService, NetworkModule, OsrmGeometryDto, OsrmLegDto, OsrmRouteDto, OsrmRouteResponseDto, OkHttpClient, Retrofit
 
-### Community 14 - "TypeScript Config"
+### Community 12 - "Repository Dependency Injection"
+Cohesion: 0.16
+Nodes (5): RepositoryModule, FirebaseSeatAvailabilityRepository, FirebaseShuttleStopRepository, SeatAvailabilityRepository, ShuttleStopRepository
+
+### Community 13 - "TypeScript Build Configuration"
 Cohesion: 0.14
 Nodes (13): compileOnSave, compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, module, noImplicitReturns, noUnusedLocals, outDir (+5 more)
 
-### Community 15 - "Driver Duty & Seats"
-Cohesion: 0.23
-Nodes (6): AndroidViewModel, Off-Duty Sentinel Write, StudentMapScreen, StudentMapViewModel, DriverDashboardUiState, DriverDashboardViewModel
+### Community 14 - "Navigation Routes & Destinations"
+Cohesion: 0.42
+Nodes (8): AdminPanel, DriverDashboard, Login, Map, NavRoute, NotificationCenter, Register, StudentMap
 
-### Community 16 - "Firebase Providers"
-Cohesion: 0.18
-Nodes (7): FirebaseModule, FirebaseDatabase, FirebaseFirestore, FirebaseMessaging, FirebaseMessaging singleton, FirebaseFirestore singleton, FirebaseShuttleStopRepository
-
-### Community 17 - "Campus Ink Theme"
-Cohesion: 0.28
-Nodes (9): UniColors palette, UniDarkScheme, UniLightScheme, UniShapes, UniShuttleTheme, UniTypography, Campus Ink Design Language, Modifier.hardShadow (+1 more)
-
-### Community 18 - "Arrival Cloud Function"
+### Community 15 - "Backend Geo-proximity Cloud Functions"
 Cohesion: 0.22
 Nodes (7): firestore, messaging, onShuttleLocationUpdate, SeatData, ShuttleData, StopDoc, THRESHOLD_MAP
 
-### Community 19 - "Driver Seat Counter"
-Cohesion: 0.32
-Nodes (3): SeatAvailabilityRepository, StateFlow, DriverSeatViewModel
+### Community 16 - "Map Provider & OpenFreeMap Config"
+Cohesion: 0.25
+Nodes (7): MapProviderConfig, MapLibre Native Android, OpenFreeMap, OSRM (Open Source Routing Machine), OsrmApiService, OsrmRoutingRepository, RouteRepository
 
-### Community 20 - "Transit Domain Models"
+### Community 17 - "Room Database & Persistence Module"
 Cohesion: 0.29
-Nodes (6): CampusLatLng (domain model), ShuttleLocation (domain model), ShuttleStop (domain model), StopAlert (domain model), StopEta (domain model), CampusMapUiState
+Nodes (3): UniShuttleDatabase, DatabaseModule, RoomDatabase
 
-### Community 21 - "Driver Cockpit Screens"
-Cohesion: 0.47
-Nodes (5): DriverDashboardScreen, DriverSeatCounterScreen, SeatAvailability (domain model), SeatAvailabilityMeter, DriverSeatUiState
+### Community 18 - "Firebase Infrastructure Providers"
+Cohesion: 0.25
+Nodes (4): FirebaseModule, FirebaseDatabase, FirebaseFirestore, FirebaseMessaging
 
-### Community 23 - "Notification Cards"
+### Community 19 - "Main Application Activity & Permissions"
+Cohesion: 0.40
+Nodes (3): MainActivity, Bundle, ComponentActivity
+
+### Community 22 - "Domain Auth Specifications & Plans"
 Cohesion: 0.67
-Nodes (3): NotificationRow, NotificationCategory (ARRIVAL/SYSTEM/DELAY), UniCard
-
-### Community 24 - "Seat Meter Widgets"
-Cohesion: 1.00
-Nodes (3): SeatAvailability (domain model), SeatAvailabilityMeter, SeatMeter
+Nodes (4): Institutional Domain Lock (@vitstudent.ac.in), Google Sign-In Setup Guide (Credential Manager), Google Sign-in, Role Routing, Sign-out Implementation Plan, UniShuttle Master System Context & Design Specification
 
 ## Knowledge Gaps
-- **70 isolated node(s):** `DirectionsRouteDto`, `DirectionsPolylineDto`, `DirectionsLegDto`, `DirectionsTextValueDto`, `UniColors` (+65 more)
+- **49 isolated node(s):** `FirestoreSeatAvailabilityDto`, `FirestoreShuttleStopDto`, `OsrmRouteDto`, `OsrmGeometryDto`, `OsrmLegDto` (+44 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **13 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `CampusMapViewModel` connect `Map Data ViewModels` to `Community None`, `Local Notification Storage`, `Campus Map Screen`, `Backend Rules & Build Config`, `Driver Location Service`, `Campus Ink Components`, `Driver Duty & Seats`, `Driver Seat Counter`, `Transit Domain Models`?**
-  _High betweenness centrality (0.084) - this node is a cross-community bridge._
-- **Why does `LocalNotificationRepository` connect `Local Notification Storage` to `Firebase Providers`, `Community None`, `Campus Map Screen`, `Auth DI & User Model`?**
-  _High betweenness centrality (0.069) - this node is a cross-community bridge._
-- **Why does `DriverDashboardViewModel` connect `Driver Duty & Seats` to `Login UI & Components`, `Auth DI & User Model`, `Driver Location Service`, `Auth State & Admin Panel`, `Map Data ViewModels`, `Driver Seat Counter`, `Driver Cockpit Screens`?**
-  _High betweenness centrality (0.068) - this node is a cross-community bridge._
-- **Are the 2 inferred relationships involving `CampusMapViewModel` (e.g. with `DriverDashboardViewModel` and `DriverSeatViewModel`) actually correct?**
-  _`CampusMapViewModel` has 2 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `DirectionsRouteDto`, `DirectionsPolylineDto`, `DirectionsLegDto` to the rest of the system?**
-  _76 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Login UI & Components` be split into smaller, more focused modules?**
-  _Cohesion score 0.05185779203421545 - nodes in this community are weakly interconnected._
-- **Should `Local Notification Storage` be split into smaller, more focused modules?**
-  _Cohesion score 0.059907834101382486 - nodes in this community are weakly interconnected._
+- **Why does `AuthViewModel` connect `Role-Based Access & Admin Panel` to `UI Components & Authentication Screens`, `Local Notification Storage & Alerts`, `Map Controller & Location Services`, `Map & Driver ViewModels`, `Driver Dashboard & Seat Controls`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Why does `StudentMapContent()` connect `Seat Availability & Route Data` to `UI Components & Authentication Screens`, `Local Notification Storage & Alerts`, `Notification State & Models`, `Map Controller & Location Services`?**
+  _High betweenness centrality (0.064) - this node is a cross-community bridge._
+- **Why does `CampusMapController` connect `Map Controller & Location Services` to `UI Components & Authentication Screens`, `Local Notification Storage & Alerts`, `Notification State & Models`, `Seat Availability & Route Data`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **What connects `FirestoreSeatAvailabilityDto`, `FirestoreShuttleStopDto`, `OsrmRouteDto` to the rest of the system?**
+  _51 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `UI Components & Authentication Screens` be split into smaller, more focused modules?**
+  _Cohesion score 0.05924978687127025 - nodes in this community are weakly interconnected._
+- **Should `Local Notification Storage & Alerts` be split into smaller, more focused modules?**
+  _Cohesion score 0.06972789115646258 - nodes in this community are weakly interconnected._
+- **Should `Notification State & Models` be split into smaller, more focused modules?**
+  _Cohesion score 0.1066066066066066 - nodes in this community are weakly interconnected._
