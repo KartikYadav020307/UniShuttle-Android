@@ -45,6 +45,14 @@
             android:exported="false"
             android:foregroundServiceType="location" />
 
+        <receiver
+            android:name=".driver.DriverNotificationStopReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.unishuttle.app.driver.ACTION_NOTIFICATION_STOP" />
+            </intent-filter>
+        </receiver>
+
         <service
             android:name=".data.remote.UniShuttleMessagingService"
             android:exported="false">

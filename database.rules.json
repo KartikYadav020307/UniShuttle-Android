@@ -2,10 +2,27 @@
   "rules": {
     "shuttles": {
       "$shuttleId": {
-        // Authenticated drivers can write their own shuttle node.
-        // Any authenticated user (student, admin) can read.
-        ".read":  "auth != null",
-        ".write": "auth != null"
+        // Authenticated campus users (students, drivers, admins) can observe telemetry
+        ".read": "auth != null",
+        // Authenticated drivers update or remove their shuttle telemetry.
+        // Enforce driver-to-shuttle assignment fail-closed until custom claims are provisioned:
+        ".write": "auth != null && ((auth.token.role === 'driver' && auth.token.shuttleId === $shuttleId) || auth.token.admin === true)",
+        ".validate": "!newData.exists() || newData.hasChildren(['latitude', 'longitude', 'heading', 'updatedAtMillis'])",
+        "latitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -90 && newData.val() <= 90"
+        },
+        "longitude": {
+          ".validate": "newData.isNumber() && newData.val() >= -180 && newData.val() <= 180"
+        },
+        "heading": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 360"
+        },
+        "updatedAtMillis": {
+          ".validate": "newData.isNumber() && newData.val() > 0"
+        },
+        "$other": {
+          ".validate": false
+        }
       }
     }
   }

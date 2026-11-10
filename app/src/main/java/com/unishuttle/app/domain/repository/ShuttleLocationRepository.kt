@@ -13,4 +13,6 @@ interface ShuttleLocationRepository {
         heading: Float,
         updatedAtMillis: Long,
     )
+
+    suspend fun removeDriverLocation(shuttleId: String)
 }

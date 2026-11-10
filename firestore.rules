@@ -2,50 +2,186 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── Helper functions ──
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid} (matches Firebase Auth UID)
+    // Fields:
+    //   - uid: string (required) - Firebase Auth UID, must match document ID
+    //   - email: string (required) - User email address (@vitstudent.ac.in for students)
+    //   - displayName: string (required) - Display name, editable by owner (max 100 chars)
+    //   - photoUrl: string (optional) - Profile photo URL, editable by owner (max 2048 chars)
+    //   - role: string (required) - Role ('student'|'STUDENT', 'driver'|'DRIVER', 'admin'|'ADMIN')
+    //   - shuttleId: string (optional) - Assigned shuttle ID for drivers, managed by admin
+    //   - createdAt: timestamp (optional) - Account creation timestamp, immutable
+    //
+    // Collection: stops
+    // Document ID: {stopId} (e.g. stop_main_gate)
+    // Fields:
+    //   - name: string (required) - Stop name
+    //   - latitude: number (required) - Geographic latitude
+    //   - longitude: number (required) - Geographic longitude
+    //   - order: int/number (required) - Sequence order for campus shuttle route
+    //
+    // Collection: seatAvailability
+    // Document ID: {shuttleId} (e.g. shuttle_1)
+    // Fields:
+    //   - availableSeats: int (required) - Available seats (0 <= availableSeats <= totalSeats)
+    //   - totalSeats: int (required) - Total shuttle capacity, immutable by driver
+    //   - updatedAtMillis: int (required) - Epoch timestamp in milliseconds
+    //
+    // ===============================================================
+
+    // ── Helper Functions ──
+
+    // Check if the request is from an authenticated user
     function isSignedIn() {
       return request.auth != null;
     }
 
-    function userRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    // Check if the signed-in user is the owner of the document UID
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
     }
 
-    function isDriver()  { return isSignedIn() && userRole() == 'DRIVER'; }
-    function isAdmin()   { return isSignedIn() && userRole() == 'ADMIN'; }
-    function isStudent() { return isSignedIn() && userRole() == 'STUDENT'; }
-    function isOwner(uid) { return isSignedIn() && request.auth.uid == uid; }
+    // Reference to a user document
+    function userDoc(uid) {
+      return /databases/$(database)/documents/users/$(uid);
+    }
+
+    // Safely check if a user document exists
+    function userExists(uid) {
+      return exists(userDoc(uid));
+    }
+
+    // Safely get user data map from Firestore
+    function getUserData(uid) {
+      return get(userDoc(uid)).data;
+    }
+
+    // Check if user is an admin via custom claims or user profile document
+    // Handles case variations ('admin', 'ADMIN')
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token != null && (
+          ('role' in request.auth.token && request.auth.token.role in ['admin', 'ADMIN']) ||
+          ('admin' in request.auth.token && request.auth.token.admin == true)
+        )) ||
+        (userExists(request.auth.uid) &&
+          'role' in getUserData(request.auth.uid) &&
+          getUserData(request.auth.uid).role in ['admin', 'ADMIN'])
+      );
+    }
+
+    // Check if user is a driver (handles 'driver', 'DRIVER')
+    function isDriver() {
+      return isSignedIn() &&
+        userExists(request.auth.uid) &&
+        'role' in getUserData(request.auth.uid) &&
+        getUserData(request.auth.uid).role in ['driver', 'DRIVER'];
+    }
+
+    // Check if user is a student (handles 'student', 'STUDENT')
+    function isStudent() {
+      return isSignedIn() &&
+        userExists(request.auth.uid) &&
+        'role' in getUserData(request.auth.uid) &&
+        getUserData(request.auth.uid).role in ['student', 'STUDENT'];
+    }
+
+    // Check if user is the assigned driver for a specific shuttle
+    // Handles case variations ('driver', 'DRIVER') and checks shuttleId match
+    function isDriverForShuttle(shuttleId) {
+      return isSignedIn() &&
+        userExists(request.auth.uid) &&
+        'role' in getUserData(request.auth.uid) &&
+        getUserData(request.auth.uid).role in ['driver', 'DRIVER'] &&
+        'shuttleId' in getUserData(request.auth.uid) &&
+        getUserData(request.auth.uid).shuttleId == shuttleId;
+    }
+
+    // Validation for student initial registration
+    function isValidStudentRegistration(uid) {
+      return request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'photoUrl', 'role', 'createdAt', 'shuttleId']) &&
+        request.resource.data.uid == uid &&
+        request.resource.data.role in ['student', 'STUDENT'] &&
+        request.resource.data.email is string &&
+        request.resource.data.email.size() > 0 &&
+        request.resource.data.email.size() <= 254 &&
+        request.resource.data.displayName is string &&
+        request.resource.data.displayName.size() <= 100 &&
+        (!('photoUrl' in request.resource.data) || (request.resource.data.photoUrl is string && request.resource.data.photoUrl.size() <= 2048)) &&
+        (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp);
+    }
+
+    // Validation for owner profile updates (bounds and type checks)
+    function isValidProfileUpdate() {
+      return (!('displayName' in request.resource.data) ||
+              (request.resource.data.displayName is string && request.resource.data.displayName.size() <= 100)) &&
+             (!('photoUrl' in request.resource.data) ||
+              (request.resource.data.photoUrl is string && request.resource.data.photoUrl.size() <= 2048));
+    }
+
+    // Validation for seat availability driver updates
+    function isValidDriverSeatUpdate() {
+      return request.resource.data.keys().hasOnly(['availableSeats', 'totalSeats', 'updatedAtMillis']) &&
+        request.resource.data.totalSeats == resource.data.totalSeats &&
+        request.resource.data.availableSeats is int &&
+        request.resource.data.availableSeats >= 0 &&
+        request.resource.data.availableSeats <= resource.data.totalSeats &&
+        request.resource.data.updatedAtMillis is int;
+    }
 
     // ── users/{uid} ──
-    // A signed-in user can read and create only their own document.
-    // On create the role must be "student" — the client never writes any
-    // other role. On update (owner or admin), the role field cannot change.
     match /users/{uid} {
-      allow create: if isSignedIn() && isOwner(uid)
-                    && request.resource.data.role == "student";
-      allow read:   if isOwner(uid) || isAdmin();
-      allow update: if (isOwner(uid) || isAdmin())
-                    && request.resource.data.role == resource.data.role;
+      // Create: Signed-in user creating their own document with role 'student'/'STUDENT', or admin
+      allow create: if (isOwner(uid) && isValidStudentRegistration(uid)) || isAdmin();
+
+      // Read: Owner (request.auth.uid == uid) or Admin
+      allow read: if isOwner(uid) || isAdmin();
+
+      // Update: Admin can update any field; Owner (non-admin) can ONLY update displayName and photoUrl
+      allow update: if isAdmin() || (
+        isOwner(uid) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoUrl']) &&
+        isValidProfileUpdate()
+      );
+
+      // Delete: Admin only
       allow delete: if isAdmin();
     }
 
     // ── stops/{stopId} ──
-    // All authenticated users can read stops (map and stop sheets).
-    // Only admins can write.
     match /stops/{stopId} {
-      allow read:  if isSignedIn();
+      // Read: Any signed-in user (students, drivers, admins)
+      allow read: if isSignedIn();
+
+      // Write: Admin only
       allow write: if isAdmin();
     }
 
     // ── seatAvailability/{shuttleId} ──
-    // Students and drivers can read (seat meters).
-    // Only the driver or admin can write (driver writes their own shuttle doc).
     match /seatAvailability/{shuttleId} {
-      allow read:  if isSignedIn();
-      allow write: if isDriver() || isAdmin();
+      // Read: Any signed-in user
+      allow read: if isSignedIn();
+
+      // Create: Admin only (provisioned during setup)
+      allow create: if isAdmin();
+
+      // Update: Admin can update; Assigned driver can update availableSeats and updatedAtMillis
+      // Driver constraints: totalSeats immutable, availableSeats in [0, totalSeats], updatedAtMillis is int
+      allow update: if isAdmin() || (
+        isDriverForShuttle(shuttleId) &&
+        isValidDriverSeatUpdate()
+      );
+
+      // Delete: Admin only
+      allow delete: if isAdmin();
     }
 
-    // Deny everything else.
+    // ── Default Deny ──
     match /{document=**} {
       allow read, write: if false;
     }

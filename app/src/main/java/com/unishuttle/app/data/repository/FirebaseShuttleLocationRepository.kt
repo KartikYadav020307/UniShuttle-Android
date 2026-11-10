@@ -55,4 +55,8 @@ class FirebaseShuttleLocationRepository @Inject constructor(
         )
         shuttlesRef.child(shuttleId).setValue(dto).await()
     }
+
+    override suspend fun removeDriverLocation(shuttleId: String) {
+        shuttlesRef.child(shuttleId).removeValue().await()
+    }
 }

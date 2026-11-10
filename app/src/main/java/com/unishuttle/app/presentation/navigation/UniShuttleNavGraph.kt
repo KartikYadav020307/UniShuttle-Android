@@ -19,7 +19,7 @@ import com.unishuttle.app.domain.model.UserRole
 import com.unishuttle.app.presentation.ui.screen.admin.AdminPanelScreen
 import com.unishuttle.app.presentation.ui.screen.auth.LoginScreen
 import com.unishuttle.app.presentation.ui.screen.auth.RegisterScreen
-import com.unishuttle.app.presentation.ui.screen.driver.DriverHomeScreen
+import com.unishuttle.app.presentation.ui.screen.driver.DriverDashboardScreen
 import com.unishuttle.app.presentation.ui.screen.notifications.NotificationCenterScreen
 import com.unishuttle.app.presentation.ui.screen.student.StudentMapScreen
 import com.unishuttle.app.presentation.viewmodel.AuthUiState
@@ -120,9 +120,9 @@ fun UniShuttleNavGraph(
             )
         }
 
-        // ── Driver (Step 1 placeholder; Step 4 replaces it) ──
+        // ── Driver ──
         composable(NavRoute.DriverDashboard.route) {
-            DriverHomeScreen(
+            DriverDashboardScreen(
                 onLogout = { authViewModel.logout() },
             )
         }

@@ -88,14 +88,14 @@ private fun ShuttleStop.toSheetModel(
     val arrivals = etasHere
         .sortedBy { it.durationSeconds }
         .map { eta ->
-            val seats = seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId }
+            val seats = seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId && !it.isOffDuty }
             StopArrival(
                 shuttleId = "SH-${eta.shuttleId}",
                 seatsFree = seats?.availableSeats ?: 0,
             )
         }
     val best = etasHere.minByOrNull { it.durationSeconds }
-    val bestSeats = best?.let { seatAvailability.firstOrNull { s -> s.shuttleId == it.shuttleId } }
+    val bestSeats = best?.let { seatAvailability.firstOrNull { s -> s.shuttleId == it.shuttleId && !s.isOffDuty } }
 
     return CampusStop(
         id = id,
@@ -391,7 +391,7 @@ fun StudentMapContent(
             stopEtas.filter { it.stopId == stop.id }.minByOrNull { it.durationSeconds }
         }
         val displaySeats = bestEta?.let { eta ->
-            seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId }
+            seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId && !it.isOffDuty }
         }
 
         com.unishuttle.app.presentation.ui.component.UniCard(

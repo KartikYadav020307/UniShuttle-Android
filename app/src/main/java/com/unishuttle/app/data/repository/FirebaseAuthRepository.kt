@@ -156,6 +156,13 @@ class FirebaseAuthRepository @Inject constructor(
         clearCredentialState()
     }
 
+    override suspend fun refreshIdToken(): String? {
+        val user = auth.currentUser ?: return null
+        return runCatching {
+            user.getIdToken(true).await().token
+        }.getOrNull()
+    }
+
     // ── Internal helpers ─────────────────────────────────────────────────────
 
     /** Kills the just-created session and the Credential Manager state with it. */

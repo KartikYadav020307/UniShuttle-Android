@@ -83,6 +83,7 @@ fun SeatAvailabilityMeter(
 @Composable
 private fun SeatAvailability.meterColor(): Color =
     when {
+        isOffDuty -> MaterialTheme.colorScheme.outlineVariant
         isFull -> MaterialTheme.colorScheme.error
         availableRatio > 0.50f -> Color(0xFF1B7F4C)
         availableRatio > 0.20f -> Color(0xFFFFB020)
@@ -90,10 +91,11 @@ private fun SeatAvailability.meterColor(): Color =
     }
 
 private fun SeatAvailability.labelText(): String =
-    "$availableSeats of $totalSeats seats available"
+    if (isOffDuty) "Off duty" else "$availableSeats of $totalSeats seats available"
 
 private fun SeatAvailability.statusText(): String =
     when {
+        isOffDuty -> "Unavailable"
         isFull -> "Full"
         availableRatio > 0.50f -> "Open"
         availableRatio > 0.20f -> "Filling"

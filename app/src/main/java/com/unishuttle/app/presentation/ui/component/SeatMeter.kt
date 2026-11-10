@@ -114,13 +114,15 @@ fun SeatMeter(
     modifier: Modifier = Modifier,
     label: String = "Seats on shuttle",
 ) {
-    val occupied = seatAvailability?.occupiedSeats ?: 0
-    val total = seatAvailability?.totalSeats ?: 0
+    val isOffDuty = seatAvailability?.isOffDuty == true
+    val occupied = if (isOffDuty) 0 else seatAvailability?.occupiedSeats ?: 0
+    val total = if (isOffDuty) 0 else seatAvailability?.totalSeats ?: 0
+    val displayLabel = if (isOffDuty) "$label · Off duty" else label
     SeatMeter(
         occupiedSeats = occupied,
         totalSeats = total,
         modifier = modifier,
-        label = label,
+        label = displayLabel,
     )
 }
 

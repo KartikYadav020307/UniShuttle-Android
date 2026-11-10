@@ -1,9 +1,9 @@
 package com.unishuttle.app.presentation.viewmodel
 
 data class DriverSeatUiState(
-    val shuttleId: String = "demo-shuttle",
-    val availableSeats: Int = 24,
-    val totalSeats: Int = 24,
+    val shuttleId: String = "",
+    val availableSeats: Int = 0,
+    val totalSeats: Int = 0,
     val isSaving: Boolean = false,
     val errorMessage: String? = null,
 )

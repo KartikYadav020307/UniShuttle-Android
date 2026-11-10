@@ -38,4 +38,7 @@ interface AuthRepository {
      * Only auth state is cleared; caches (map tiles, database) are untouched.
      */
     suspend fun logout()
+
+    /** Force-refresh the Firebase Auth ID token to reload custom claims. */
+    suspend fun refreshIdToken(): String?
 }

@@ -18,4 +18,5 @@ data class SeatAvailability(
         0f
     }
     val isFull: Boolean = totalSeats > 0 && availableSeats <= 0
+    val isOffDuty: Boolean get() = updatedAtMillis <= 0L
 }
