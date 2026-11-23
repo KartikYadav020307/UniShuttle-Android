@@ -29,7 +29,7 @@ class UniShuttleMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d(TAG, "FCM token refreshed: $token")
+        Log.d(TAG, "FCM registration token refreshed")
         // Future: send token to backend for user-targeted pushes
     }
 

@@ -5,4 +5,5 @@ data class FirebaseShuttleLocationDto(
     val longitude: Double? = null,
     val heading: Double? = null,
     val updatedAtMillis: Long? = null,
+    val routeId: String? = null,
 )

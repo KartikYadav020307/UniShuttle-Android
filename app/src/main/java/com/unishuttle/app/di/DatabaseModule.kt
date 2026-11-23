@@ -3,6 +3,7 @@ package com.unishuttle.app.di
 import android.content.Context
 import androidx.room.Room
 import com.unishuttle.app.data.local.dao.NotificationDao
+import com.unishuttle.app.data.local.dao.RouteGeometryDao
 import com.unishuttle.app.data.local.database.UniShuttleDatabase
 import dagger.Module
 import dagger.Provides
@@ -21,10 +22,17 @@ object DatabaseModule {
             context,
             UniShuttleDatabase::class.java,
             "unishuttle.db",
-        ).build()
+        )
+            .addMigrations(UniShuttleDatabase.MIGRATION_1_2)
+            .build()
 
     @Provides
     @Singleton
     fun provideNotificationDao(database: UniShuttleDatabase): NotificationDao =
         database.notificationDao()
+
+    @Provides
+    @Singleton
+    fun provideRouteGeometryDao(database: UniShuttleDatabase): RouteGeometryDao =
+        database.routeGeometryDao()
 }

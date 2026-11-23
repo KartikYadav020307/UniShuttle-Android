@@ -1,6 +1,7 @@
 package com.unishuttle.app.presentation.ui.screen.map
 
 import com.unishuttle.app.domain.model.CampusLatLng
+import com.unishuttle.app.domain.model.CampusRoute
 import com.unishuttle.app.domain.model.ShuttleStop
 
 object CampusMapDefaults {
@@ -9,6 +10,31 @@ object CampusMapDefaults {
     val CampusBoundsSouthWest = CampusLatLng(latitude = 12.9592, longitude = 79.1459)
     val CampusBoundsNorthEast = CampusLatLng(latitude = 12.9792, longitude = 79.1659)
     const val DefaultZoom = 16.0
+
+    const val ROUTE_LOOP_A_ID = "route_loop_a"
+    const val ROUTE_LOOP_B_ID = "route_loop_b"
+
+    val RouteLoopA = CampusRoute(
+        id = ROUTE_LOOP_A_ID,
+        name = "Loop A",
+        description = "Clockwise Campus Loop",
+        colorHex = "#D32F2F", // UniColors.Brick
+        stopIds = listOf("stop_main_gate", "stop_tech_tower", "stop_sjt"),
+        version = 1,
+        isActive = true,
+    )
+
+    val RouteLoopB = CampusRoute(
+        id = ROUTE_LOOP_B_ID,
+        name = "Loop B",
+        description = "Counter-Clockwise Campus Loop",
+        colorHex = "#1976D2", // Distinct accessible blue
+        stopIds = listOf("stop_sjt", "stop_tech_tower", "stop_main_gate"),
+        version = 1,
+        isActive = true,
+    )
+
+    val DefaultRoutes = listOf(RouteLoopA, RouteLoopB)
 
     /**
      * Immutable static campus stops used as local fallback when Firestore is

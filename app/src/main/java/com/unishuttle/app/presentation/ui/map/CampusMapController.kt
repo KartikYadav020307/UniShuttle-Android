@@ -19,21 +19,20 @@ import org.maplibre.geojson.LineString
 import org.maplibre.geojson.Point
 import com.unishuttle.app.config.MapProviderConfig
 import com.unishuttle.app.domain.model.CampusLatLng
+import com.unishuttle.app.domain.model.CampusRoute
+import com.unishuttle.app.domain.model.RouteGeometry
 import com.unishuttle.app.domain.model.ShuttleLocation
 import com.unishuttle.app.domain.model.ShuttleStop
-import com.unishuttle.app.presentation.ui.theme.UniColors
-import androidx.compose.ui.graphics.toArgb
 import kotlin.math.abs
 
 /**
  * Owns all MapLibre state for the campus map: style, sources, layers,
- * markers, route geometry, and camera movements. Data updates go through
- * [setStops]/[setShuttles]/[setRoute] and only touch GeoJSON sources and
- * layer visibility — the map itself is never recreated by data changes.
+ * markers, multi-route geometries, and camera movements. Data updates go through
+ * [setStops]/[setShuttles]/[setRoutes] and only touch GeoJSON sources —
+ * the map itself is never recreated by data changes.
  *
- * Stop and shuttle icons are chosen per feature via an "icon" property so no
- * layer filters are needed; real and fallback route lines use separate
- * sources and toggle visibility instead of filters.
+ * Route lines use data-driven styling via Expression.toColor(Expression.get("color")),
+ * with solid overlapping lines for shared roadways and dashed styling for fallbacks.
  */
 class CampusMapController {
 
@@ -46,8 +45,8 @@ class CampusMapController {
     // Last known data, re-applied whenever a new style finishes loading.
     private var stopFeatures: List<Feature> = emptyList()
     private var shuttleFeatures: List<Feature> = emptyList()
-    private var realRouteGeometry: LineString? = null
-    private var fallbackRouteGeometry: LineString? = null
+    private var realRouteFeatures: List<Feature> = emptyList()
+    private var fallbackRouteFeatures: List<Feature> = emptyList()
     private var shuttleIconIds: Set<String> = emptySet()
 
     private var onStopClick: ((String) -> Unit)? = null
@@ -98,7 +97,6 @@ class CampusMapController {
                 Point.fromLngLat(stop.longitude, stop.latitude),
             ).apply {
                 addStringProperty(PROP_STOP_ID, stop.id)
-                // The stops layer renders the icon named by this property.
                 addStringProperty(
                     PROP_ICON,
                     if (isSelected) ICON_STOP_SELECTED else ICON_STOP,
@@ -110,8 +108,6 @@ class CampusMapController {
 
     fun setShuttles(shuttles: List<ShuttleLocation>) {
         shuttleFeatures = shuttles.mapNotNull { shuttle ->
-            // Unusable coordinates: skip the marker entirely (graceful state)
-            // instead of plotting an arbitrary position.
             if (!isUsableCoordinate(shuttle.latitude, shuttle.longitude)) {
                 return@mapNotNull null
             }
@@ -119,6 +115,7 @@ class CampusMapController {
                 Point.fromLngLat(shuttle.longitude, shuttle.latitude),
             ).apply {
                 addStringProperty(PROP_SHUTTLE_ID, shuttle.id)
+                addStringProperty(PROP_SHUTTLE_LABEL, shuttle.displayLabel)
                 addNumberProperty(PROP_HEADING, shuttle.heading.toDouble())
             }
         }
@@ -126,24 +123,65 @@ class CampusMapController {
     }
 
     /**
-     * @param isFallback true when [points] are straight stop-to-stop segments
-     * rather than real road geometry; the fallback line is dashed so it can
-     * never be mistaken for a routed path.
+     * Updates multiple route geometries with distinct data-driven colors.
+     */
+    fun setRoutes(geometries: List<RouteGeometry>, routes: List<CampusRoute>) {
+        val routeColorMap = routes.associate { route ->
+            route.id to RouteColorValidator.sanitizeColorHex(route.colorHex)
+        }
+
+        val reals = mutableListOf<Feature>()
+        val fallbacks = mutableListOf<Feature>()
+
+        geometries.forEach { geom ->
+            if (geom.points.size >= 2) {
+                val lineString = LineString.fromLngLats(
+                    geom.points.map { Point.fromLngLat(it.longitude, it.latitude) },
+                )
+                val colorHex = routeColorMap[geom.routeId] ?: RouteColorValidator.DEFAULT_FALLBACK_COLOR_HEX
+                val feature = Feature.fromGeometry(lineString).apply {
+                    addStringProperty(PROP_ROUTE_ID, geom.routeId)
+                    addStringProperty(PROP_COLOR, colorHex)
+                }
+
+                if (geom.isFallback) {
+                    fallbacks.add(feature)
+                } else {
+                    reals.add(feature)
+                }
+            }
+        }
+
+        realRouteFeatures = reals
+        fallbackRouteFeatures = fallbacks
+        pushRoutes()
+    }
+
+    /**
+     * Backward-compatible single route setter.
      */
     fun setRoute(points: List<CampusLatLng>, isFallback: Boolean) {
-        val geometry = if (points.size >= 2) {
-            LineString.fromLngLats(points.map { Point.fromLngLat(it.longitude, it.latitude) })
+        val colorHex = RouteColorValidator.DEFAULT_FALLBACK_COLOR_HEX
+        if (points.size >= 2) {
+            val lineString = LineString.fromLngLats(
+                points.map { Point.fromLngLat(it.longitude, it.latitude) },
+            )
+            val feature = Feature.fromGeometry(lineString).apply {
+                addStringProperty(PROP_ROUTE_ID, "default_route")
+                addStringProperty(PROP_COLOR, colorHex)
+            }
+            if (isFallback) {
+                fallbackRouteFeatures = listOf(feature)
+                realRouteFeatures = emptyList()
+            } else {
+                realRouteFeatures = listOf(feature)
+                fallbackRouteFeatures = emptyList()
+            }
         } else {
-            null
+            realRouteFeatures = emptyList()
+            fallbackRouteFeatures = emptyList()
         }
-        if (isFallback) {
-            fallbackRouteGeometry = geometry
-            realRouteGeometry = null
-        } else {
-            realRouteGeometry = geometry
-            fallbackRouteGeometry = null
-        }
-        pushRoute()
+        pushRoutes()
     }
 
     /** Frames [points]; never called again after the first fit so user pan wins. */
@@ -195,21 +233,21 @@ class CampusMapController {
 
         style.addLayer(
             LineLayer(LAYER_ROUTE, SOURCE_ROUTE_REAL).withProperties(
-                PropertyFactory.lineColor(UniColors.Brick.toArgb()),
+                PropertyFactory.lineColor(Expression.toColor(Expression.get(PROP_COLOR))),
                 PropertyFactory.lineWidth(ROUTE_WIDTH_PX),
                 PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                 PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
-                PropertyFactory.visibility(Property.NONE),
+                PropertyFactory.visibility(Property.VISIBLE),
             ),
         )
         style.addLayer(
             LineLayer(LAYER_ROUTE_FALLBACK, SOURCE_ROUTE_FALLBACK).withProperties(
-                PropertyFactory.lineColor(UniColors.Brick.toArgb()),
+                PropertyFactory.lineColor(Expression.toColor(Expression.get(PROP_COLOR))),
                 PropertyFactory.lineWidth(ROUTE_WIDTH_PX),
                 PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                 PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                 PropertyFactory.lineDasharray(arrayOf(2f, 2f)),
-                PropertyFactory.visibility(Property.NONE),
+                PropertyFactory.visibility(Property.VISIBLE),
             ),
         )
         style.addLayer(
@@ -230,7 +268,7 @@ class CampusMapController {
 
         pushStops()
         pushShuttles()
-        pushRoute()
+        pushRoutes()
     }
 
     private fun pushStops() {
@@ -244,17 +282,19 @@ class CampusMapController {
         val style = style ?: return
         val ctx = context ?: return
 
-        // Symbol icon ids equal the shuttle id property value exactly.
-        val wantedIds = shuttleFeatures
-            .mapNotNull { it.getStringProperty(PROP_SHUTTLE_ID) }
-            .toSet()
+        val shuttleLabels = shuttleFeatures.associate {
+            it.getStringProperty(PROP_SHUTTLE_ID) to it.getStringProperty(PROP_SHUTTLE_LABEL)
+        }
+        val wantedIds = shuttleLabels.keys.filterNotNull().toSet()
 
-        // Drop stale shuttle icons so markers never linger for gone shuttles.
         shuttleIconIds.filter { it !in wantedIds }.forEach { stale ->
             runCatching { style.removeImage(stale) }
         }
         wantedIds.filter { it !in shuttleIconIds }.forEach { id ->
-            style.addImage(id, CampusMarkerFactory.shuttleIcon(ctx, "SH-$id"))
+            style.addImage(
+                id,
+                CampusMarkerFactory.shuttleIcon(ctx, shuttleLabels[id] ?: "SH-$id"),
+            )
         }
         shuttleIconIds = wantedIds
 
@@ -263,32 +303,18 @@ class CampusMapController {
         )
     }
 
-    private fun pushRoute() {
+    private fun pushRoutes() {
         val style = style ?: return
-        val real = realRouteGeometry
-        val fallback = fallbackRouteGeometry
-
         (style.getSource(SOURCE_ROUTE_REAL) as? GeoJsonSource)?.setGeoJson(
-            real?.let { FeatureCollection.fromFeature(Feature.fromGeometry(it)) }
-                ?: FeatureCollection.fromFeatures(emptyList()),
+            FeatureCollection.fromFeatures(realRouteFeatures),
         )
         (style.getSource(SOURCE_ROUTE_FALLBACK) as? GeoJsonSource)?.setGeoJson(
-            fallback?.let { FeatureCollection.fromFeature(Feature.fromGeometry(it)) }
-                ?: FeatureCollection.fromFeatures(emptyList()),
-        )
-        style.getLayer(LAYER_ROUTE)?.setProperties(
-            PropertyFactory.visibility(if (real != null) Property.VISIBLE else Property.NONE),
-        )
-        style.getLayer(LAYER_ROUTE_FALLBACK)?.setProperties(
-            PropertyFactory.visibility(if (fallback != null) Property.VISIBLE else Property.NONE),
+            FeatureCollection.fromFeatures(fallbackRouteFeatures),
         )
     }
 
     private companion object {
-        // 5dp at ~xxhdpi; MapLibre line-width is pixel-based.
         const val ROUTE_WIDTH_PX = 14f
-
-        // Coordinates below this magnitude are treated as missing (0,0).
         const val MIN_ABS_COORDINATE = 0.0001
 
         const val SOURCE_STOPS = "unishuttle-stops"
@@ -307,6 +333,9 @@ class CampusMapController {
         const val PROP_STOP_ID = "stopId"
         const val PROP_ICON = "icon"
         const val PROP_SHUTTLE_ID = "shuttleId"
+        const val PROP_SHUTTLE_LABEL = "shuttleLabel"
         const val PROP_HEADING = "heading"
+        const val PROP_ROUTE_ID = "routeId"
+        const val PROP_COLOR = "color"
     }
 }

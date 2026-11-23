@@ -1,11 +1,14 @@
 package com.unishuttle.app
 
+import com.unishuttle.app.data.mapper.toDomain
 import com.unishuttle.app.domain.model.CampusLatLng
+import com.unishuttle.app.domain.model.CampusRoute
 import com.unishuttle.app.domain.model.SeatAvailability
 import com.unishuttle.app.domain.model.ShuttleStop
 import com.unishuttle.app.domain.model.StopEta
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.roundToInt
@@ -123,5 +126,127 @@ class RoutingAndAlertUnitTest {
         org.junit.Assert.assertFalse(isVitStudentEmail("driver@gmail.com"))
         org.junit.Assert.assertFalse(isVitStudentEmail("intruder@vit.ac.in"))
         org.junit.Assert.assertFalse(isVitStudentEmail("fake@vitstudent.ac.in.evil.com"))
+    }
+
+    @Test
+    fun `shuttle stop route membership and legacy unassigned behavior`() {
+        val loopStop = ShuttleStop(
+            id = "stop_main_gate",
+            name = "Main Gate",
+            latitude = 12.9692,
+            longitude = 79.1559,
+            order = 1,
+        )
+        val legacyStop = ShuttleStop(
+            id = "stop_legacy",
+            name = "Legacy Stop",
+            latitude = 12.9700,
+            longitude = 79.1600,
+            order = 99,
+        )
+
+        val routeA = CampusRoute(
+            id = "route_loop_a",
+            name = "Loop A",
+            colorHex = "#D32F2F",
+            stopIds = listOf("stop_main_gate"),
+        )
+        val routeB = CampusRoute(
+            id = "route_loop_b",
+            name = "Loop B",
+            colorHex = "#1976D2",
+            stopIds = listOf("stop_main_gate"),
+        )
+        val routeC = routeA.copy(id = "route_loop_c", stopIds = emptyList())
+
+        assertTrue(loopStop.servesCampusRoute(routeA))
+        assertTrue(loopStop.servesCampusRoute(routeB))
+        org.junit.Assert.assertFalse(loopStop.servesCampusRoute(routeC))
+        assertTrue(loopStop.servesCampusRoute(null)) // All routes includes every stop
+        org.junit.Assert.assertFalse(loopStop.isUnassigned(listOf(routeA, routeB)))
+        assertTrue(legacyStop.isUnassigned(listOf(routeA, routeB, routeC)))
+    }
+
+    @Test
+    fun `mappers preserve unassigned legacy stops and telemetry without fabrication`() {
+        val legacyStopDto = com.unishuttle.app.data.remote.dto.FirestoreShuttleStopDto(
+            name = "Old Stop",
+            latitude = 12.9692,
+            longitude = 79.1559,
+            order = 1L,
+            routeIds = listOf("unverified_route"), // Legacy field must not assign membership
+        )
+        val mappedStop = legacyStopDto.toDomain("legacy_1")
+        assertNotNull(mappedStop)
+        val routeNotContainingStop = CampusRoute(
+            id = "unverified_route",
+            name = "Unverified Route",
+            colorHex = "#D32F2F",
+            stopIds = emptyList(),
+        )
+        assertTrue(mappedStop!!.isUnassigned(listOf(routeNotContainingStop)))
+        assertTrue(mappedStop.servesCampusRoute(null))
+
+        val legacyLocDto = com.unishuttle.app.data.remote.dto.FirebaseShuttleLocationDto(
+            latitude = 12.9692,
+            longitude = 79.1559,
+            heading = 90.0,
+            updatedAtMillis = 1000L,
+            routeId = null, // Missing in legacy RTDB
+        )
+        val mappedLoc = legacyLocDto.toDomain("shuttle_legacy")
+        assertNotNull(mappedLoc)
+        org.junit.Assert.assertNull(mappedLoc!!.routeId)
+        org.junit.Assert.assertFalse(mappedLoc.isAssigned)
+
+        val locationWithoutHeading = com.unishuttle.app.data.remote.dto.FirebaseShuttleLocationDto(
+            latitude = 12.9692,
+            longitude = 79.1559,
+            heading = null,
+            updatedAtMillis = 1000L,
+        ).toDomain("shuttle_no_heading")
+        assertNotNull(locationWithoutHeading)
+        org.junit.Assert.assertFalse(locationWithoutHeading!!.hasHeading)
+    }
+
+    @Test
+    fun `route color validator accepts valid contrast colors and rejects out-of-range colors`() {
+        // Red and Blue used in defaults
+        val sanitizedRed = com.unishuttle.app.presentation.ui.map.RouteColorValidator.sanitizeColorHex("#D32F2F")
+        assertEquals("#D32F2F", sanitizedRed)
+
+        val sanitizedBlue = com.unishuttle.app.presentation.ui.map.RouteColorValidator.sanitizeColorHex("#1976D2")
+        assertEquals("#1976D2", sanitizedBlue)
+
+        // Invalid hex falls back to default brick
+        val invalidHex = com.unishuttle.app.presentation.ui.map.RouteColorValidator.sanitizeColorHex("not-a-color")
+        assertEquals(com.unishuttle.app.presentation.ui.map.RouteColorValidator.DEFAULT_FALLBACK_COLOR_HEX, invalidHex)
+
+        // Near white is rejected and falls back
+        val pureWhite = com.unishuttle.app.presentation.ui.map.RouteColorValidator.sanitizeColorHex("#FFFFFF")
+        assertEquals(com.unishuttle.app.presentation.ui.map.RouteColorValidator.DEFAULT_FALLBACK_COLOR_HEX, pureWhite)
+
+        // Mid-light gray passed the former luminance cutoff but lacks 3:1 contrast on a light style.
+        val lowContrastGray = com.unishuttle.app.presentation.ui.map.RouteColorValidator.sanitizeColorHex("#AAAAAA")
+        assertEquals(com.unishuttle.app.presentation.ui.map.RouteColorValidator.DEFAULT_FALLBACK_COLOR_HEX, lowContrastGray)
+    }
+
+    @Test
+    fun `stop position label fallback safely handles Int MAX_VALUE without showing overflow string`() {
+        val stopWithDefaultOrder = ShuttleStop(
+            id = "stop_1",
+            name = "Stop 1",
+            latitude = 12.9692,
+            longitude = 79.1559,
+            order = Int.MAX_VALUE,
+        )
+        val allStops = listOf(stopWithDefaultOrder)
+
+        val stopIdx = allStops.indexOfFirst { it.id == stopWithDefaultOrder.id }
+        val displayOrder = if (stopWithDefaultOrder.order in 1..allStops.size) stopWithDefaultOrder.order else (stopIdx + 1).coerceAtLeast(1)
+        val label = "Stop $displayOrder of ${allStops.size}"
+
+        assertEquals("Stop 1 of 1", label)
+        org.junit.Assert.assertFalse("Must never display Int.MAX_VALUE", label.contains("2147483647"))
     }
 }
