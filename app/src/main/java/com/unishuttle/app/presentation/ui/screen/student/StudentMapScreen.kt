@@ -40,10 +40,12 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.unishuttle.app.config.MapProviderConfig
 import com.unishuttle.app.domain.model.CampusLatLng
+import com.unishuttle.app.domain.model.CampusRoute
+import com.unishuttle.app.domain.model.RouteGeometry
 import com.unishuttle.app.domain.model.SeatAvailability
 import com.unishuttle.app.domain.model.ShuttleLocation
 import com.unishuttle.app.domain.model.ShuttleStop
@@ -82,35 +84,65 @@ data class CampusStop(
 private fun ShuttleStop.toSheetModel(
     allStops: List<ShuttleStop>,
     stopEtas: List<StopEta>,
+    shuttles: List<ShuttleLocation>,
     seatAvailability: List<SeatAvailability>,
+    selectedRoute: CampusRoute?,
+    allRoutes: List<CampusRoute>,
 ): CampusStop {
     val etasHere = stopEtas.filter { it.stopId == id }
+    val shuttleLabels = shuttles.associate { it.id to it.displayLabel }
     val arrivals = etasHere
         .sortedBy { it.durationSeconds }
         .map { eta ->
             val seats = seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId && !it.isOffDuty }
             StopArrival(
-                shuttleId = "SH-${eta.shuttleId}",
+                shuttleId = shuttleLabels[eta.shuttleId] ?: ("SH-" + eta.shuttleId),
                 seatsFree = seats?.availableSeats ?: 0,
             )
         }
     val best = etasHere.minByOrNull { it.durationSeconds }
     val bestSeats = best?.let { seatAvailability.firstOrNull { s -> s.shuttleId == it.shuttleId && !s.isOffDuty } }
 
+    val positionLabel = if (selectedRoute != null) {
+        val idx = selectedRoute.stopIds.indexOf(id)
+        if (idx >= 0) {
+            "Stop ${idx + 1} of ${selectedRoute.stopIds.size}"
+        } else {
+            val stopIdx = allStops.indexOfFirst { it.id == id }
+            val displayOrder = if (order in 1..allStops.size) order else (stopIdx + 1).coerceAtLeast(1)
+            "Stop $displayOrder of ${allStops.size}"
+        }
+    } else {
+        val stopIdx = allStops.indexOfFirst { it.id == id }
+        val displayOrder = if (order in 1..allStops.size) order else (stopIdx + 1).coerceAtLeast(1)
+        "Stop $displayOrder of ${allStops.size}"
+    }
+
+    val routeNameLabel = if (selectedRoute != null) {
+        selectedRoute.name
+    } else {
+        val serving = allRoutes.filter { id in it.stopIds }
+        if (serving.isNotEmpty()) serving.joinToString(" & ") { it.name } else "Unassigned"
+    }
+
     return CampusStop(
         id = id,
         name = name,
-        nextShuttle = best?.shuttleId?.let { "SH-$it" }.orEmpty(),
+        nextShuttle = best?.shuttleId?.let { shuttleLabels[it] ?: ("SH-" + it) }.orEmpty(),
+        routeName = routeNameLabel,
         eta = best?.etaText ?: "—",
         availableSeats = bestSeats?.availableSeats ?: 0,
         totalSeats = bestSeats?.totalSeats ?: 24,
-        routePosition = "Stop ${order} of ${allStops.size}",
+        routePosition = positionLabel,
         trafficLabel = "",
         arrivals = arrivals,
     )
 }
 
-private val RouteOptions = listOf("All routes", "Loop A", "Loop B")
+data class RouteOptionItem(
+    val name: String,
+    val id: String?,
+)
 
 @Composable
 fun StudentMapScreen(
@@ -121,27 +153,26 @@ fun StudentMapScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    // Mirror the on-duty guard: only show shuttles updated in the last 5 minutes.
-    val activeShuttles = remember(uiState.shuttles, uiState.stopEtas.size) {
-        val cutoff = System.currentTimeMillis() - SHUTTLE_FRESHNESS_MILLIS
-        uiState.shuttles.filter { it.updatedAtMillis >= cutoff }
+    val cutoff = System.currentTimeMillis() - SHUTTLE_FRESHNESS_MILLIS
+    val activeShuttles = remember(uiState.filteredShuttles, uiState.stopEtas.size) {
+        uiState.filteredShuttles.filter { it.updatedAtMillis >= cutoff }
     }
 
-    var selectedRoute by rememberSaveable { mutableStateOf(RouteOptions.first()) }
-
     StudentMapContent(
-        stops = uiState.stops,
+        stops = uiState.filteredStops,
         shuttles = activeShuttles,
+        routes = uiState.routes,
+        selectedRouteId = uiState.selectedRouteId,
+        routeGeometries = uiState.filteredGeometries,
         seatAvailability = uiState.seatAvailability,
-        stopEtas = uiState.stopEtas,
-        routePoints = uiState.routePoints,
+        stopEtas = uiState.filteredStopEtas,
         activeAlerts = uiState.activeAlerts,
         selectedStopId = uiState.selectedStopId,
         isUsingFallbackStops = uiState.isUsingFallbackStops,
+        isUsingFallbackRoutes = uiState.isUsingFallbackRoutes,
         isLoading = uiState.isLoading,
         errorMessage = uiState.errorMessage,
-        selectedRoute = selectedRoute,
-        onRouteChange = { selectedRoute = it },
+        onRouteChange = viewModel::selectRoute,
         onStopSelected = viewModel::selectStop,
         onStopSheetDismiss = viewModel::dismissStopDetails,
         onSubscribeAlert = viewModel::subscribeToStopAlert,
@@ -156,26 +187,33 @@ fun StudentMapScreen(
 fun StudentMapContent(
     stops: List<ShuttleStop>,
     shuttles: List<ShuttleLocation>,
+    routes: List<CampusRoute>,
+    selectedRouteId: String?,
+    routeGeometries: List<RouteGeometry>,
     seatAvailability: List<SeatAvailability>,
     stopEtas: List<StopEta>,
-    routePoints: List<CampusLatLng>,
     selectedStopId: String?,
     isLoading: Boolean,
     errorMessage: String?,
-    selectedRoute: String,
-    onRouteChange: (String) -> Unit,
+    onRouteChange: (String?) -> Unit,
     onStopSelected: (String) -> Unit,
     onStopSheetDismiss: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier,
     isUsingFallbackStops: Boolean = false,
+    isUsingFallbackRoutes: Boolean = false,
     activeAlerts: List<StopAlert> = emptyList(),
     onSubscribeAlert: (stopId: String, stopName: String, thresholdMinutes: Int) -> Unit = { _, _, _ -> },
     onUnsubscribeAlert: (stopId: String) -> Unit = {},
     isMapPreview: Boolean = false,
 ) {
     var showSignOutDialog by rememberSaveable { mutableStateOf(false) }
+
+    val routeOptions = remember(routes) {
+        listOf(RouteOptionItem("All routes", null)) +
+            routes.map { RouteOptionItem(it.name, it.id) }
+    }
 
     Column(
         modifier = modifier
@@ -261,7 +299,7 @@ fun StudentMapContent(
             }
         }
 
-        // ── 2. Route chips (visual only — stops carry no routeId yet) ──
+        // ── 2. Interactive Route Filter Chips ──
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -269,11 +307,11 @@ fun StudentMapContent(
                 .padding(horizontal = 20.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            RouteOptions.forEach { route ->
+            routeOptions.forEach { option ->
                 AlertChip(
-                    text = route,
-                    selected = route == selectedRoute,
-                    onClick = { onRouteChange(route) },
+                    text = option.name,
+                    selected = option.id == selectedRouteId,
+                    onClick = { onRouteChange(option.id) },
                 )
             }
         }
@@ -296,14 +334,16 @@ fun StudentMapContent(
         LaunchedEffect(shuttles) {
             controller.setShuttles(shuttles)
         }
-        LaunchedEffect(routePoints, stops) {
-            when {
-                routePoints.size >= 2 -> controller.setRoute(routePoints, isFallback = false)
-                stops.size >= 2 -> controller.setRoute(
+        LaunchedEffect(routeGeometries, routes) {
+            if (routeGeometries.isNotEmpty()) {
+                controller.setRoutes(routeGeometries, routes)
+            } else if (stops.size >= 2) {
+                controller.setRoute(
                     stops.map { CampusLatLng(it.latitude, it.longitude) },
                     isFallback = true,
                 )
-                else -> controller.setRoute(emptyList(), isFallback = false)
+            } else {
+                controller.setRoute(emptyList(), isFallback = false)
             }
         }
         // Fit the camera once when the map and stop data are both ready.
@@ -364,7 +404,7 @@ fun StudentMapContent(
                         .align(Alignment.TopCenter)
                         .padding(top = 12.dp),
                 )
-            } else if (isUsingFallbackStops) {
+            } else if (routeGeometries.any { it.isFallback }) {
                 Box(
                     modifier = Modifier
                         .align(Alignment.TopCenter)
@@ -375,7 +415,23 @@ fun StudentMapContent(
                         .padding(horizontal = 12.dp, vertical = 4.dp),
                 ) {
                     Text(
-                        text = "⚡ Offline Mode · Static campus stops",
+                        text = "Approximate cached route paths · live ETAs may be unavailable",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = UniColors.Ink,
+                    )
+                }
+            } else if (isUsingFallbackStops || isUsingFallbackRoutes) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 10.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(UniColors.Sun)
+                        .border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.outline), RoundedCornerShape(999.dp))
+                        .padding(horizontal = 12.dp, vertical = 4.dp),
+                ) {
+                    Text(
+                        text = "⚡ Default campus routes & stops",
                         style = MaterialTheme.typography.labelSmall,
                         color = UniColors.Ink,
                     )
@@ -389,6 +445,9 @@ fun StudentMapContent(
         val displayStop = stops.firstOrNull { it.id == selectedStopId } ?: stops.firstOrNull()
         val bestEta = displayStop?.let { stop ->
             stopEtas.filter { it.stopId == stop.id }.minByOrNull { it.durationSeconds }
+        }
+        val nextShuttleLabel = bestEta?.let { eta ->
+            shuttles.firstOrNull { it.id == eta.shuttleId }?.displayLabel ?: ("SH-" + eta.shuttleId)
         }
         val displaySeats = bestEta?.let { eta ->
             seatAvailability.firstOrNull { it.shuttleId == eta.shuttleId && !it.isOffDuty }
@@ -417,7 +476,7 @@ fun StudentMapContent(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = bestEta?.let { "Next: SH-${it.shuttleId}" } ?: "Waiting for live shuttles",
+                            text = nextShuttleLabel?.let { "Next: $it" } ?: "Waiting for live shuttles",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -462,8 +521,16 @@ fun StudentMapContent(
         val sheetStop = stops.firstOrNull { it.id == selectedStopId }
         if (sheetStop != null) {
             val activeAlert = activeAlerts.firstOrNull { it.stopId == sheetStop.id }
+            val selectedRoute = routes.firstOrNull { it.id == selectedRouteId }
             StopDetailSheet(
-                stop = sheetStop.toSheetModel(stops, stopEtas, seatAvailability),
+                stop = sheetStop.toSheetModel(
+                    stops,
+                    stopEtas,
+                    shuttles,
+                    seatAvailability,
+                    selectedRoute,
+                    routes,
+                ),
                 isAlertArmed = activeAlert != null,
                 armedThresholdMinutes = activeAlert?.thresholdMinutes,
                 onSubscribeAlert = onSubscribeAlert,
@@ -510,13 +577,14 @@ fun StudentMapPreviewLight() {
         StudentMapContent(
             stops = PreviewStops,
             shuttles = emptyList(),
+            routes = CampusMapDefaults.DefaultRoutes,
+            selectedRouteId = null,
+            routeGeometries = emptyList(),
             seatAvailability = PreviewSeats,
             stopEtas = PreviewEtas,
-            routePoints = emptyList(),
             selectedStopId = null,
             isLoading = false,
             errorMessage = null,
-            selectedRoute = "All routes",
             onRouteChange = {},
             onStopSelected = {},
             onStopSheetDismiss = {},
@@ -534,13 +602,14 @@ fun StudentMapPreviewDark() {
         StudentMapContent(
             stops = PreviewStops,
             shuttles = emptyList(),
+            routes = CampusMapDefaults.DefaultRoutes,
+            selectedRouteId = null,
+            routeGeometries = emptyList(),
             seatAvailability = PreviewSeats,
             stopEtas = PreviewEtas,
-            routePoints = emptyList(),
             selectedStopId = null,
             isLoading = false,
             errorMessage = null,
-            selectedRoute = "All routes",
             onRouteChange = {},
             onStopSelected = {},
             onStopSheetDismiss = {},

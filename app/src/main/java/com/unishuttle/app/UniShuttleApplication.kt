@@ -7,13 +7,17 @@ import android.os.Build
 import android.util.Log
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 
 @HiltAndroidApp
 class UniShuttleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
         createNotificationChannel()
-        logFcmToken()
+        requestFcmRegistrationToken()
     }
 
     private fun createNotificationChannel() {
@@ -31,9 +35,9 @@ class UniShuttleApplication : Application() {
         }
     }
 
-    private fun logFcmToken() {
-        FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-            Log.d("UniShuttle", "FCM token: $token")
+    private fun requestFcmRegistrationToken() {
+        FirebaseMessaging.getInstance().token.addOnSuccessListener {
+            Log.d("UniShuttle", "FCM registration token available")
         }
     }
 

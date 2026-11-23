@@ -1,12 +1,14 @@
 package com.unishuttle.app.di
 
 import com.unishuttle.app.data.repository.FirebaseAuthRepository
+import com.unishuttle.app.data.repository.FirebaseCampusRouteRepository
 import com.unishuttle.app.data.repository.FirebaseSeatAvailabilityRepository
 import com.unishuttle.app.data.repository.FirebaseShuttleLocationRepository
 import com.unishuttle.app.data.repository.FirebaseShuttleStopRepository
 import com.unishuttle.app.data.repository.LocalNotificationRepository
 import com.unishuttle.app.data.repository.OsrmRoutingRepository
 import com.unishuttle.app.domain.repository.AuthRepository
+import com.unishuttle.app.domain.repository.CampusRouteRepository
 import com.unishuttle.app.domain.repository.NotificationRepository
 import com.unishuttle.app.domain.repository.RouteRepository
 import com.unishuttle.app.domain.repository.SeatAvailabilityRepository
@@ -21,6 +23,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
+    @Binds
+    @Singleton
+    abstract fun bindCampusRouteRepository(
+        repository: FirebaseCampusRouteRepository,
+    ): CampusRouteRepository
+
     @Binds
     @Singleton
     abstract fun bindShuttleLocationRepository(
